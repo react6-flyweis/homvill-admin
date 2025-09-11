@@ -29,7 +29,7 @@ const Privacy = lazy(() => import("./components/Privacy"));
 const Push = lazy(() => import("./components/PushNotification/Push"));
 const Support = lazy(() => import("./components/Support/Support"));
 const NewUser = lazy(() => import("./components/NewUser"));
-
+const UserDetails = lazy(() => import("./components/Users/UserDetails"));
 const LoginPage = lazy(() => import("./components/Login"));
 const Signup = lazy(() => import("./components/Signup"));
 const Forgot = lazy(() => import("./components/Forgot/Forgot"));
@@ -74,6 +74,7 @@ export const routes = [
   { path: "push", element: <Push /> },
   { path: "support", element: <Support /> },
   { path: "users/newuser", element: <NewUser /> },
+  { path: "users/:id", element: <UserDetails /> },
 ];
 
 export default routes;
