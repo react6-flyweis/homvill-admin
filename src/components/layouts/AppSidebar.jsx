@@ -13,6 +13,7 @@ import {
 } from "react-icons/fa";
 import { MdOutlineSubscriptions } from "react-icons/md";
 import logo from "../assets/logo.svg";
+import { Sidebar, SidebarContent, SidebarHeader } from "../ui/sidebar";
 
 const menuItems = [
   { label: "Overview", path: "/dashboard/home", icon: <FaTachometerAlt /> },
@@ -60,14 +61,15 @@ const menuItems = [
 
 export const AppSidebar = () => {
   return (
-    <div className="shrink-0 w-60 bg-gray-50 border-r border-[#8A1538] flex flex-col">
+    <Sidebar className="bg-gray-50 border-r border-[#8A1538]">
+      {/* <Sidebar className="shrink-0 w-60 bg-gray-50 border-r border-[#8A1538] flex flex-col"> */}
       {/* Logo */}
-      <div className="p-6 flex items-center justify-center">
+      <SidebarHeader className="p-6 flex items-center justify-center">
         <img src={logo} alt="Logo" className="w-32" />
-      </div>
+      </SidebarHeader>
 
       {/* Menu */}
-      <ul className="flex-1 py-4 space-y-1 m-2 overflow-y-auto hide-scrollbar">
+      <SidebarContent className="flex-1 py-4 space-y-1 m-2 overflow-y-auto hide-scrollbar">
         {menuItems.map((item, index) => (
           <NavLink
             key={index}
@@ -84,7 +86,7 @@ export const AppSidebar = () => {
             {item.label}
           </NavLink>
         ))}
-      </ul>
-    </div>
+      </SidebarContent>
+    </Sidebar>
   );
 };
