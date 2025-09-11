@@ -2,6 +2,11 @@
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "esnext"],
     "target": "ESNext",
-    "isolatedModules": true
+    "isolatedModules": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   }
 }
