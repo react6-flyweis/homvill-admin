@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { authRoutes, routes } from "./routes";
 import { LoadingScreen } from "./components/layouts/LoadingScreen";
 import AdminLayout from "./components/AdminLayout";
+import NotFoundPage from "./pages/Notfound";
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
             <Route key={path} path={path} element={element} />
           ))}
         </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Suspense>
   );
