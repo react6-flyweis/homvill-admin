@@ -3,12 +3,15 @@ import App from "./App";
 import "./index.css";
 // import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
+import ErrorBoundary from "./components/layouts/ErrorBoundary";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
   <BrowserRouter>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </BrowserRouter>
 );
 
