@@ -10,6 +10,8 @@
     "clsx": "^2.1.1",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
+    "jspdf": "^3.0.2",
+    "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.540.0",
     "radix-ui": "latest",
     "react": "^19.1.1",
