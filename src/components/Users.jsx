@@ -1,13 +1,24 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { DataTable } from "./datatable/DataTable";
 import { usersColumns } from "./Users/usersColumns";
 import { generateUsers } from "./Users/usersData";
+import { ExportSelector } from "./datatable/ExportSelector";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 export default function UsersPage() {
   const [activeTab, setActiveTab] = useState("all");
+  const [filter, setFilter] = useState("all");
   const [data, setData] = useState([]);
+
+  const tableRef = useRef();
 
   useEffect(() => {
     const users = generateUsers(10);
@@ -48,12 +59,17 @@ export default function UsersPage() {
 
         {/* Right Section */}
         <div className="flex items-center gap-3">
-          <select className="border rounded-md px-3 py-2 text-sm shadow-md">
-            <option>Download</option>
-          </select>
-          <select className="border rounded-md px-3 py-2 text-sm shadow-md">
-            <option>All</option>
-          </select>
+          <ExportSelector tableRef={tableRef} />
+          <Select onValueChange={setFilter} value={filter}>
+            <SelectTrigger className="border rounded-md px-3 py-2 text-sm shadow-md">
+              <SelectValue placeholder="All" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -65,7 +81,7 @@ export default function UsersPage() {
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center pb-2 text-sm font-medium relative ${
               activeTab === tab.id
-                ? "text-[#8A1538] border-b-2 border-[#8A1538]"
+                ? "text-primary border-b-2 border-primary"
                 : "text-gray-600"
             }`}
           >
@@ -86,6 +102,7 @@ export default function UsersPage() {
       {/* Table */}
       <div>
         <DataTable
+          ref={tableRef}
           tWrapperClassName=""
           columns={usersColumns}
           data={data}
