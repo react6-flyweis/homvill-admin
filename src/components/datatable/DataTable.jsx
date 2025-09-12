@@ -26,7 +26,9 @@ function DataTableInner(
     columns,
     data,
     showPagination = true,
-    pageSize = 5, // Default page size
+    pageSize = 6, // Default page size
+    // rowClassName can be a string or a function (row) => string
+    rowClassName,
   },
   ref
 ) {
@@ -89,21 +91,30 @@ function DataTableInner(
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow className="h-12 py-2" key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      className="h-12 px-5 py-2 border-r"
-                      key={cell.id}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              table.getRowModel().rows.map((row) => {
+                const extraRowClass =
+                  typeof rowClassName === "function"
+                    ? rowClassName(row)
+                    : rowClassName || "";
+                return (
+                  <TableRow
+                    className={`h-12 py-2 ${extraRowClass}`}
+                    key={row.id}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        className="h-12 px-5 py-2 border-r"
+                        key={cell.id}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell
