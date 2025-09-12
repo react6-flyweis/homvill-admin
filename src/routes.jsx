@@ -6,6 +6,7 @@ const UsersPage = lazy(() => import("./components/Users"));
 const AuditLogs = lazy(() => import("./components/AuditLogs"));
 const SubAdmin = lazy(() => import("./components/SubAdmin"));
 const Properties = lazy(() => import("./components/Properties"));
+const AddProperty = lazy(() => import("./pages/Properties/AddProperty"));
 const ContractsTable = lazy(() => import("./components/Contracts"));
 const Banners = lazy(() => import("./components/Banners/Banners"));
 const Social = lazy(() => import("./components/Banners/Social"));
@@ -55,6 +56,7 @@ export const routes = [
   { path: "audit-logs", element: <AuditLogs /> },
   { path: "sub-admin", element: <SubAdmin /> },
   { path: "properties", element: <Properties /> },
+  { path: "properties/add", element: <AddProperty /> },
   { path: "contracts", element: <ContractsTable /> },
   { path: "chat", element: <Chat /> },
   { path: "banners", element: <Banners /> },
