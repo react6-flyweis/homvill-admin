@@ -14,7 +14,7 @@ const PropertyDetails = lazy(() =>
   import("./pages/Properties/PropertyDetails")
 );
 const AddProperty = lazy(() => import("./pages/Properties/AddProperty"));
-const ContractsTable = lazy(() => import("./components/Contracts"));
+const ContractsTable = lazy(() => import("./pages/Contracts/Contracts"));
 const Banners = lazy(() => import("./components/Banners/Banners"));
 const Social = lazy(() => import("./components/Banners/Social"));
 const New = lazy(() => import("./components/Banners/New"));
