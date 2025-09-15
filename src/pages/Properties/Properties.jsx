@@ -1,12 +1,13 @@
-import { FiPlus, FiDownload } from "react-icons/fi";
+import { FiPlus } from "react-icons/fi";
 import { useRef, useState } from "react";
-import { DataTable } from "./datatable/DataTable";
+import { DataTable } from "@/components/datatable/DataTable";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ExportSelector } from "./datatable/ExportSelector";
-import { properties } from "./Properties/propertyData";
-import { propertyColumns } from "./Properties/columns";
-import { CategoryFilter } from "./Properties/CategoryFilter";
+import { ExportSelector } from "@/components/datatable/ExportSelector";
+import { properties } from "@/components/Properties/propertyData";
+import { propertyColumns } from "@/components/Properties/columns";
+import { CategoryFilter } from "@/components/Properties/CategoryFilter";
+import toursScheduledIcon from "@/components/assets/tours-scheduled.svg";
 
 const PropertyTable = () => {
   const tableRef = useRef();
@@ -27,9 +28,11 @@ const PropertyTable = () => {
         {/* Left: Properties + Add button */}
         <div className="flex items-center gap-3">
           <h1 className="text-lg font-semibold text-gray-800">Properties</h1>
-          <Button variant="outline">
-            <FiPlus size={16} /> Add A New Property
-          </Button>
+          <Link to="/dashboard/properties/add">
+            <Button variant="outline">
+              <FiPlus size={16} /> Add A New Property
+            </Button>
+          </Link>
         </div>
 
         {/* Right: Filters + Actions */}
@@ -59,7 +62,7 @@ const PropertyTable = () => {
             onClick={() => setFilter("RENT")}
             className={`px-4 py-2 rounded-md text-sm font-medium ${
               filter === "RENT"
-                ? "bg-[#800020] text-white"
+                ? "bg-primary text-white"
                 : "bg-gray-100 text-gray-500"
             }`}
           >
@@ -82,7 +85,12 @@ const PropertyTable = () => {
           {/* Tours Scheduled */}
           <Link to="/dashboard/tours-scheduled">
             <Button>
-              Tours Scheduled <FiDownload size={16} />
+              Tours Scheduled
+              <img
+                src={toursScheduledIcon}
+                alt="Tours Scheduled"
+                className="size-5"
+              />
             </Button>
           </Link>
         </div>
@@ -126,7 +134,9 @@ const PropertyTable = () => {
           ref={tableRef}
           columns={propertyColumns}
           data={filteredProperties}
-          rowClassName={(row) => (row.original?.sold ? "bg-green-100" : "")}
+          rowClassName={(row) =>
+            row.original?.status !== "available" ? "bg-green-100" : ""
+          }
           showPagination={true}
         />
       </div>
