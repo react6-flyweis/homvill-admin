@@ -109,17 +109,17 @@ export const usersColumns = [
     cell: ({ row }) => {
       // row.original contains the original data object for this row
       return (
-        <div className="flex items-center justify-end gap-1">
+        <div className="flex items-center justify-end">
           <Link to={`/dashboard/users/${row.original.id}`}>
             <Button variant="ghost" size="icon" title="View">
-              <EyeIcon size={16} />
+              <EyeIcon className="text-primary" size={16} />
             </Button>
           </Link>
           <Button variant="ghost" size="icon" title="Delete">
-            <Trash2Icon size={16} />
+            <Trash2Icon className="text-destructive" size={16} />
           </Button>
           <Switch
-            className="data-[state=checked]:bg-green-400"
+            className="data-[state=checked]:bg-green-400 ml-2"
             defaultChecked={row.original.active ?? true}
           />
         </div>
