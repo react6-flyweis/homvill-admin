@@ -20,6 +20,8 @@ const Social = lazy(() => import("./components/Banners/Social"));
 const New = lazy(() => import("./components/Banners/New"));
 const Chat = lazy(() => import("./components/Chat"));
 const ToursScheduled = lazy(() => import("./pages/Properties/ToursScheduled"));
+const TourPropertyDetails = lazy(() =>
+  import("./pages/Properties/TourPropertyDetails")
 );
 const Subscriptions = lazy(() =>
   import("./components/Subscriptions/Subscribe")
@@ -71,6 +73,7 @@ export const routes = [
   { path: "properties/:id", element: <PropertyDetails /> },
   { path: "contracts", element: <ContractsTable /> },
   { path: "tours-scheduled", element: <ToursScheduled /> },
+  { path: "tours-scheduled/:id", element: <TourPropertyDetails /> },
   { path: "chat", element: <Chat /> },
   { path: "banners", element: <Banners /> },
   { path: "banners/social", element: <Social /> },
