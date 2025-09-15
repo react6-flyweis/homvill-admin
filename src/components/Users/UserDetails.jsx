@@ -1,11 +1,10 @@
 import React from "react";
-import { ArrowLeft, PenLine } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { PenLine } from "lucide-react";
+import { PageLayout } from "../layouts/PageLayout";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 
 export default function UserDetails() {
-  const navigate = useNavigate();
   const randomId = Math.floor(Math.random() * 70) + 1;
   const avatarUrl = `https://i.pravatar.cc/150?img=${randomId}`;
 
@@ -23,20 +22,10 @@ export default function UserDetails() {
   };
 
   return (
-    <div style={{ fontFamily: "Poppins" }} className="space-y-6">
-      <div className="">
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="size-6" />
-          </Button>
-          <h2 className="text-lg font-semibold">Users details</h2>
-        </div>
-        <p className="text-sm">
-          Lorem Ipsum is simply dummy text of the printing and typesetting
-          industry.
-        </p>
-      </div>
-
+    <PageLayout
+      title="Users details"
+      description="Lorem Ipsum is simply dummy text of the printing and typesetting industry."
+    >
       <div className="rounded-lg border p-6 bg-white shadow-sm">
         <div className="flex items-center justify-between gap-6">
           {/* Left: avatar + main info */}
@@ -150,6 +139,6 @@ export default function UserDetails() {
           </div>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }
