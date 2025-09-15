@@ -15,6 +15,7 @@ const PropertyDetails = lazy(() =>
 );
 const AddProperty = lazy(() => import("./pages/Properties/AddProperty"));
 const ContractsTable = lazy(() => import("./pages/Contracts/Contracts"));
+const ContractDetails = lazy(() => import("./pages/Contracts/ContractDetails"));
 const Partners = lazy(() => import("./pages/Partners/Partners"));
 const Banners = lazy(() => import("./components/Banners/Banners"));
 const Social = lazy(() => import("./components/Banners/Social"));
@@ -73,6 +74,7 @@ export const routes = [
   { path: "properties/add", element: <AddProperty /> },
   { path: "properties/:id", element: <PropertyDetails /> },
   { path: "contracts", element: <ContractsTable /> },
+  { path: "contracts/:id", element: <ContractDetails /> },
   { path: "partners", element: <Partners /> },
   { path: "tours-scheduled", element: <ToursScheduled /> },
   { path: "tours-scheduled/:id", element: <TourPropertyDetails /> },
