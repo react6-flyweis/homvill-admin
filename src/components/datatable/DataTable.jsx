@@ -65,7 +65,7 @@ function DataTableInner(
   const pageCount = table.getPageCount();
   return (
     <div className="space-y-4 border shadow-sm pb-4 rounded bg-white">
-      <div className={cn("overflow-hidden", tWrapperClassName)}>
+      <div className={cn("overflow-auto data-table-scroll", tWrapperClassName)}>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

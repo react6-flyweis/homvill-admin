@@ -143,3 +143,50 @@ code {
     cursor: pointer;
   }
 }
+
+/* Custom scrollbar for data tables */
+.data-table-scroll {
+  overflow: auto;
+  padding-right: 4px;
+}
+
+/* WebKit-based browsers (Chrome, Safari, Edge) */
+.data-table-scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.data-table-scroll::-webkit-scrollbar-track {
+  /* Lighter tinted track based on primary with a fallback for older browsers */
+  background: color-mix(in srgb, var(--primary) 15%, white 85%);
+  background-color: rgba(0, 0, 0, 0.02); /* fallback */
+}
+.data-table-scroll::-webkit-scrollbar-thumb {
+  /* Hide the visible thumb while keeping the track visible. */
+  background-color: transparent;
+  border-radius: 8px;
+  border: 0;
+  height: 0;
+  min-height: 0;
+  pointer-events: none; /* make it non-interactive */
+}
+
+/* Remove hover effect since thumb is hidden */
+
+/* Hide the arrow buttons on WebKit scrollbars (up/down or left/right arrows) */
+.data-table-scroll::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Make the scrollbar corner transparent so there are no visible artifacts */
+.data-table-scroll::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox */
+.data-table-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary)
+    color-mix(in srgb, var(--primary) 15%, white 85%);
+}
