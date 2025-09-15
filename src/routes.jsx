@@ -5,7 +5,7 @@ const Overview = lazy(() => import("./components/Overview"));
 const UsersPage = lazy(() => import("./components/Users"));
 const AuditLogs = lazy(() => import("./components/AuditLogs"));
 const SubAdmin = lazy(() => import("./components/SubAdmin"));
-const Properties = lazy(() => import("./components/Properties"));
+const Properties = lazy(() => import("./pages/Properties/Properties"));
 const OfferEnquiry = lazy(() => import("./pages/Properties/OfferEnquiry"));
 const OfferEnquiryDetails = lazy(() =>
   import("./pages/Properties/OfferEnquiryDetails")
@@ -19,8 +19,7 @@ const Banners = lazy(() => import("./components/Banners/Banners"));
 const Social = lazy(() => import("./components/Banners/Social"));
 const New = lazy(() => import("./components/Banners/New"));
 const Chat = lazy(() => import("./components/Chat"));
-const ToursScheduled = lazy(() =>
-  import("./components/Properties/ToursScheduled")
+const ToursScheduled = lazy(() => import("./pages/Properties/ToursScheduled"));
 );
 const Subscriptions = lazy(() =>
   import("./components/Subscriptions/Subscribe")
@@ -39,7 +38,7 @@ const Terms = lazy(() => import("./components/Terms"));
 const Privacy = lazy(() => import("./components/Privacy"));
 const Push = lazy(() => import("./components/PushNotification/Push"));
 const Support = lazy(() => import("./components/Support/Support"));
-const NewUser = lazy(() => import("./components/NewUser"));
+const NewUser = lazy(() => import("./pages/Users/NewUser"));
 const UserDetails = lazy(() => import("./components/Users/UserDetails"));
 const LoginPage = lazy(() => import("./components/Login"));
 const Signup = lazy(() => import("./components/Signup"));
