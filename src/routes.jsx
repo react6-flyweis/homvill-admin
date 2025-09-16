@@ -4,7 +4,8 @@ import { Navigate } from "react-router-dom";
 const Overview = lazy(() => import("./components/Overview"));
 const UsersPage = lazy(() => import("./components/Users"));
 const AuditLogs = lazy(() => import("./components/AuditLogs"));
-const SubAdmin = lazy(() => import("./components/SubAdmin"));
+const SubAdmin = lazy(() => import("./pages/SubAdmin/SubAdmin"));
+const SubAdminPermissions = lazy(() => import("./pages/SubAdmin/Permissions"));
 const Properties = lazy(() => import("./pages/Properties/Properties"));
 const OfferEnquiry = lazy(() => import("./pages/Properties/OfferEnquiry"));
 const OfferEnquiryDetails = lazy(() =>
@@ -71,6 +72,7 @@ export const routes = [
   { path: "users", element: <UsersPage /> },
   { path: "audit-logs", element: <AuditLogs /> },
   { path: "sub-admin", element: <SubAdmin /> },
+  { path: "sub-admin/permissions", element: <SubAdminPermissions /> },
   { path: "properties", element: <Properties /> },
   { path: "offer-enquiry", element: <OfferEnquiry /> },
   { path: "offer-enquiry/:id", element: <OfferEnquiryDetails /> },
