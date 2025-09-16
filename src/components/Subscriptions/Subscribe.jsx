@@ -1,5 +1,4 @@
 import React from "react";
-import { FaCrown } from "react-icons/fa";
 import { Pencil } from "lucide-react";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -70,7 +69,10 @@ export default function Subscriptions() {
             {/* Price & Button */}
             <div className="mt-6 flex justify-between items-center">
               <p className="text-lg font-bold text-[#8A1538]">$199 / mo</p>
-              <button className="px-8 py-1 bg-[#8A1538] text-white rounded text-sm">
+              <button
+                onClick={() => navigate(`/dashboard/subscribe/edit/${0}`)}
+                className="px-8 py-1 bg-[#8A1538] text-white rounded text-sm"
+              >
                 Edit
               </button>
             </div>
@@ -104,7 +106,10 @@ export default function Subscriptions() {
             {/* Price & Button */}
             <div className="mt-6 flex justify-between items-center">
               <p className="text-lg font-bold text-[#8A1538]">$499 / mo</p>
-              <button className="px-8 py-1 bg-[#8A1538] text-white rounded text-sm">
+              <button
+                onClick={() => navigate(`/dashboard/subscribe/edit/${1}`)}
+                className="px-8 py-1 bg-[#8A1538] text-white rounded text-sm"
+              >
                 Edit
               </button>
             </div>
@@ -139,7 +144,10 @@ export default function Subscriptions() {
             {/* Price & Button */}
             <div className="mt-6 flex justify-between items-center">
               <p className="text-lg font-bold text-[#8A1538]">$999 / mo</p>
-              <button className="px-8 py-1 bg-[#8A1538] text-white rounded text-sm">
+              <button
+                onClick={() => navigate(`/dashboard/subscribe/edit/${2}`)}
+                className="px-8 py-1 bg-[#8A1538] text-white rounded text-sm"
+              >
                 Edit
               </button>
             </div>
@@ -239,7 +247,11 @@ export default function Subscriptions() {
                   {item.sub}
                 </td>
                 <td className="px-4 py-2 text-gray-500">
-                  <Pencil size={16} className="inline" />
+                  <button
+                    onClick={() => navigate(`/dashboard/subscribe/edit/${i}`)}
+                  >
+                    <Pencil size={16} className="inline" />
+                  </button>
                 </td>
               </tr>
             ))}
