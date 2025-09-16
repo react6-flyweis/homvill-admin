@@ -35,6 +35,9 @@ const Subscriptions = lazy(() =>
 const AddSubscribe = lazy(() =>
   import("./components/Subscriptions/AddSubscribe")
 );
+const EditSubscribe = lazy(() =>
+  import("./components/Subscriptions/EditSubscribe")
+);
 const Active = lazy(() => import("./components/Subscriptions/Active"));
 const Earning = lazy(() => import("./components/Earning/Earning"));
 const UserQuery = lazy(() => import("./components/UserQuery"));
@@ -90,6 +93,7 @@ export const routes = [
   { path: "banners/new", element: <New /> },
   { path: "subscribe", element: <Subscriptions /> },
   { path: "subscribe/addsubscribe", element: <AddSubscribe /> },
+  { path: "subscribe/edit/:id", element: <EditSubscribe /> },
   { path: "subscribe/active", element: <Active /> },
   { path: "earning", element: <Earning /> },
   { path: "userquery", element: <UserQuery /> },
