@@ -39,8 +39,11 @@ const EditSubscribe = lazy(() =>
   import("./components/Subscriptions/EditSubscribe")
 );
 const Active = lazy(() => import("./components/Subscriptions/Active"));
-const Earning = lazy(() => import("./components/Earning/Earning"));
-const UserQuery = lazy(() => import("./components/UserQuery"));
+const Earning = lazy(() => import("./pages/Earning/Earning"));
+const TransactionHistory = lazy(() =>
+  import("./pages/Earning/TransactionHistory")
+);
+const UserQuery = lazy(() => import("./pages/UserQuery/UserQuery"));
 const PromoCode = lazy(() => import("./components/PromoCode/PromoCode"));
 const CreatePromo = lazy(() => import("./components/PromoCode/CreatePromo"));
 const EditCode = lazy(() => import("./components/PromoCode/EditCode"));
@@ -96,6 +99,7 @@ export const routes = [
   { path: "subscribe/edit/:id", element: <EditSubscribe /> },
   { path: "subscribe/active", element: <Active /> },
   { path: "earning", element: <Earning /> },
+  { path: "earning/transaction/:id", element: <TransactionHistory /> },
   { path: "userquery", element: <UserQuery /> },
   { path: "promocode", element: <PromoCode /> },
   { path: "promocode/createpromo", element: <CreatePromo /> },
