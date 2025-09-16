@@ -1,9 +1,9 @@
 import React from "react";
 
 import { Outlet } from "react-router-dom";
-import { AppSidebar } from "./layouts/AppSidebar";
-import { TopBar } from "./layouts/TopBar";
-import { SidebarInset, SidebarProvider } from "./ui/sidebar";
+import { AppSidebar } from "./AppSidebar";
+import { TopBar } from "./TopBar";
+import { SidebarInset, SidebarProvider } from "../ui/sidebar";
 
 export default function AdminLayout() {
   return (
@@ -11,7 +11,7 @@ export default function AdminLayout() {
       {/* Sidebar */}
       <AppSidebar />
       {/* Main Content */}
-      <SidebarInset className="@container relative flex flex-1 flex-col">
+      <SidebarInset className="max-h-screen @container relative flex flex-1 flex-col">
         {/* Top bar */}
         <TopBar />
 

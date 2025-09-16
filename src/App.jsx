@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import { Suspense } from "react";
 import { authRoutes, routes } from "./routes";
 import { LoadingScreen } from "./components/layouts/LoadingScreen";
-import AdminLayout from "./components/AdminLayout";
+import AdminLayout from "./components/layouts/AdminLayout";
 import NotFoundPage from "./pages/Notfound";
 
 export default function App() {
