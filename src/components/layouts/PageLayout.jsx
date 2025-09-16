@@ -7,7 +7,7 @@ export function PageLayout({ title, description, children, onBack }) {
   const handleBack = typeof onBack === "function" ? onBack : () => navigate(-1);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 h-full">
       <div className="">
         <div className="flex items-center gap-1">
           <Button variant="ghost" size="icon" onClick={handleBack}>
