@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { OfferCallDialog } from "@/components/Properties/OfferCallDialog";
 
-import phoneTick from "@/components/assets/phone-tick.svg";
+import phoneTick from "@/assets/phone-tick.svg";
 
 function ActionCell({ row }) {
   const data = row.original;

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import flat from "../assets/flat.svg"; // Verify this path is correct
+import flat from "@/assets/flat.svg"; // Verify this path is correct
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 
@@ -89,12 +89,12 @@ const PromoCodeTable = () => {
   const handleExtend = () => {
     if (!isExtendDisabled && selectedDate) {
       const updatedPromoCodes = promoCodes.filter(
-        (_, idx) => idx !== indexOfFirst + highlightedRowIndex,
+        (_, idx) => idx !== indexOfFirst + highlightedRowIndex
       );
       // Here you would typically update the state or backend, but for this example, we'll just log
       console.log(
         "Extended and removed row:",
-        indexOfFirst + highlightedRowIndex,
+        indexOfFirst + highlightedRowIndex
       );
       setShowThirdModal(false);
       setSelectedDate(null);
@@ -162,8 +162,8 @@ const PromoCodeTable = () => {
                     isHighlighted
                       ? "bg-red-100"
                       : idx % 2 === 0
-                        ? "bg-white"
-                        : "bg-gray-50"
+                      ? "bg-white"
+                      : "bg-gray-50"
                   }`}
                 >
                   <td className="px-4 py-2">{item.startDate}</td>

@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { Pencil, Trash2, Plus, X } from "lucide-react"; // for icons
 
-import fore1 from "../assets/fore1.jpg";
-import fore2 from "../assets/fore2.jpg";
-import fore3 from "../assets/fore3.jpg";
-import fore4 from "../assets/fore4.jpg";
-import fore5 from "../assets/fore5.jpg";
-import fore6 from "../assets/fore6.jpg";
-import fore7 from "../assets/fore7.jpg";
-import fore8 from "../assets/fore8.jpg";
+import fore1 from "@/assets/fore1.jpg";
+import fore2 from "@/assets/fore2.jpg";
+import fore3 from "@/assets/fore3.jpg";
+import fore4 from "@/assets/fore4.jpg";
+import fore5 from "@/assets/fore5.jpg";
+import fore6 from "@/assets/fore6.jpg";
+import fore7 from "@/assets/fore7.jpg";
+import fore8 from "@/assets/fore8.jpg";
 import { useNavigate } from "react-router-dom";
 
 const bannersData = [

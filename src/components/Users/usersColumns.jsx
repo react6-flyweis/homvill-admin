@@ -63,7 +63,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
-import verifiedBadge from "../assets/verified.png";
+import verifiedBadge from "@/assets/verified.png";
 
 export const usersColumns = [
   {

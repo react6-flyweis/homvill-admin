@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import { FaEye } from "react-icons/fa";
-import tick from "./assets/mdi_tick-all.svg";
+import tick from "@/assets/mdi_tick-all.svg";
 const UsersQueryPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const entriesPerPage = 13;

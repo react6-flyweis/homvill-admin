@@ -1,7 +1,7 @@
 import { BellIcon, SettingsIcon } from "lucide-react";
 import { Button } from "../ui/button";
 
-import profilePic from "../assets/home.svg";
+import profilePic from "@/assets/home.svg";
 import { NotificationsDrawer } from "../Notifications/NotificationsDrawer";
 
 export function TopBar() {

@@ -4,8 +4,8 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { SoldDialog } from "./SoldDialog";
-import soldBanner from "../assets/sold-banner.png";
-import rentedBanner from "../assets/rented-banner.png";
+import soldBanner from "@/assets/sold-banner.png";
+import rentedBanner from "@/assets/rented-banner.png";
 
 export const propertyColumns = [
   {

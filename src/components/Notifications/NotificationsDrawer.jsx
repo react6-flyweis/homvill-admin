@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Trash2 } from "lucide-react";
-import noNotification from "@/components/assets/no-notification.svg";
+import noNotification from "@/assets/no-notification.svg";
 import {
   Sheet,
   SheetTrigger,

@@ -12,7 +12,7 @@ import {
   FaQuestionCircle,
 } from "react-icons/fa";
 import { MdOutlineSubscriptions } from "react-icons/md";
-import logo from "../assets/logo.svg";
+import logo from "@/assets/logo.svg";
 import { Sidebar, SidebarContent, SidebarHeader } from "../ui/sidebar";
 
 const menuItems = [

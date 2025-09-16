@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Trash2 } from "lucide-react";
-import home from "./assets/home.jpg";
+import home from "@/assets/home.jpg";
 
 const reviews = [
   {

@@ -14,8 +14,8 @@ import { PhotosCollage } from "@/components/Properties/PhotosCollage";
 import { PencilLine } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-import soldBanner from "@/components/assets/sold-banner.png";
-import rentedBanner from "@/components/assets/rented-banner.png";
+import soldBanner from "@/assets/sold-banner.png";
+import rentedBanner from "@/assets/rented-banner.png";
 
 function Field({ label, children }) {
   return (

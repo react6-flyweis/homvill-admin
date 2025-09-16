@@ -1,6 +1,6 @@
 import React from "react";
-import logo from "../../components/assets/logo.svg"; // replace with your logo file
-import houseImage from "../../components/assets/group2.svg"; // replace with your left image
+import logo from "@/assets/logo.svg"; // replace with your logo file
+import houseImage from "@/assets/group2.svg"; // replace with your left image
 import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {

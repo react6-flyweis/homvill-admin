@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { EyeIcon, Trash2Icon } from "lucide-react";
 import { ContractCategoryFilter } from "@/components/Contracts/ContractCategoryFilter";
 
-import contractEnquiryIcon from "@/components/assets/contract-enquiry.png";
+import contractEnquiryIcon from "@/assets/contract-enquiry.png";
 
 const contracts = [
   {

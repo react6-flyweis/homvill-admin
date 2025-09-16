@@ -7,7 +7,7 @@ import { ExportSelector } from "@/components/datatable/ExportSelector";
 import { properties } from "@/components/Properties/propertyData";
 import { propertyColumns } from "@/components/Properties/columns";
 import { CategoryFilter } from "@/components/Properties/CategoryFilter";
-import toursScheduledIcon from "@/components/assets/tours-scheduled.svg";
+import toursScheduledIcon from "@/assets/tours-scheduled.svg";
 
 const PropertyTable = () => {
   const tableRef = useRef();

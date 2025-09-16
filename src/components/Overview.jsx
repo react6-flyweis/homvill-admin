@@ -1,6 +1,6 @@
 import React from "react";
-import totalUsersImg from "../components/assets/group3.svg"; // Replace with your left image
-import listedStatesImg from "../components/assets/frame.svg"; // Replace with your right image
+import totalUsersImg from "@/assets/group3.svg"; // Replace with your left image
+import listedStatesImg from "@/assets/frame.svg"; // Replace with your right image
 
 import { FaUser, FaHome, FaLayerGroup } from "react-icons/fa";
 import { BsGraphUp } from "react-icons/bs";
@@ -13,10 +13,10 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import wallet from "./assets/wallet.svg";
-import head from "./assets/head.svg";
-import bag from "./assets/bag.svg";
-import table from "./assets/table.svg";
+import wallet from "@/assets/wallet.svg";
+import head from "@/assets/head.svg";
+import bag from "@/assets/bag.svg";
+import table from "@/assets/table.svg";
 import { useNavigate } from "react-router-dom";
 
 // ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);

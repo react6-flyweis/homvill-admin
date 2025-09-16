@@ -1,6 +1,6 @@
 import React from "react";
-import faq from "../assets/faq.png";
-import faq1 from "../assets/faq1.png";
+import faq from "@/assets/faq.png";
+import faq1 from "@/assets/faq1.png";
 import { useNavigate } from "react-router-dom";
 const FaqCard = ({ label, icon, route }) => {
   const navigate = useNavigate();

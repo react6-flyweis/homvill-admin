@@ -1,5 +1,5 @@
 import React from "react";
-import nrk from "../assets/nrk.svg";
+import nrk from "@/assets/nrk.svg";
 import { useNavigate } from "react-router-dom";
 
 const subscriptions = [

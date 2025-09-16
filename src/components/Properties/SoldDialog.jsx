@@ -5,8 +5,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import soldBanner from "../assets/sold-banner.png";
-import rentedBanner from "../assets/rented-banner.png";
+import soldBanner from "@/assets/sold-banner.png";
+import rentedBanner from "@/assets/rented-banner.png";
 
 export const SoldDialog = ({ open, onOpenChange, isRented }) => {
   return (
