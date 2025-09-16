@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { SubAdminForm } from "@/components/SubAdmin/SubAdminForm";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 
 const AddSubAdmin = () => {
@@ -79,11 +80,12 @@ const AddSubAdmin = () => {
               className="flex items-center justify-between p-3 border rounded-lg hover:shadow-md transition"
             >
               <div className="flex items-center gap-3">
-                <img
-                  src={emp.image}
-                  alt={emp.name}
-                  className="w-10 h-10 rounded-full border"
-                />
+                <Avatar className="w-10 h-10 rounded-full border">
+                  <AvatarImage src={emp.image} alt={emp.name} />
+                  <AvatarFallback>
+                    {emp.name ? emp.name.charAt(0).toUpperCase() : "?"}
+                  </AvatarFallback>
+                </Avatar>
                 <div>
                   <p className="font-semibold">{emp.name || "Unknown"}</p>
                   <p className="text-xs text-green-600">
@@ -94,7 +96,17 @@ const AddSubAdmin = () => {
               <button
                 onClick={() =>
                   navigate(`/dashboard/sub-admin/permissions`, {
-                    state: { employee: emp },
+                    state: {
+                      employee: emp,
+                      isEdit: true,
+                      // pass existing permissions if present, otherwise sensible defaults
+                      permissions: emp.permissions || {
+                        users: { edit: true, view: true },
+                        properties: { edit: false, view: true },
+                        contracts: { edit: false, view: false },
+                        subscription: { edit: false, view: true },
+                      },
+                    },
                   })
                 }
                 className="px-4 py-1 border rounded-md text-sm hover:bg-gray-100"
