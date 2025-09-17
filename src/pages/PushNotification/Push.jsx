@@ -1,7 +1,8 @@
 import React from "react";
 import { Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { PlusCircleIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const notifications = [
   {
@@ -50,12 +51,13 @@ const NotificationsTable = () => {
         <div className="flex items-center gap-3">
           <h2 className="text-xl font-semibold">Push Notification</h2>
 
-          <button
-            className="flex items-center gap-2 px-4 py-2 bg-white rounded-md text-sm font-medium border shadow-md
-              hover:bg-[#8A1538] hover:text-white transition-colors duration-200"
+          <Button
+            variant={"outline"}
+            onClick={() => navigate("create")}
+            className="rounded hover:bg-primary hover:text-white"
           >
-            Create A New Push Notification <Plus size={16} />
-          </button>
+            Create A New Push Notification <PlusCircleIcon size={16} />
+          </Button>
         </div>
         {/* description below heading */}
         <p className="text-sm text-gray-500 mt-1 mb-4">
