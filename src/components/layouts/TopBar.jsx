@@ -3,8 +3,10 @@ import { Button } from "../ui/button";
 
 import profilePic from "@/assets/home.svg";
 import { NotificationsDrawer } from "../Notifications/NotificationsDrawer";
+import { useNavigate } from "react-router-dom";
 
 export function TopBar() {
+  const navigate = useNavigate();
   return (
     <div className="w-full  bg-white h-16 border-b border-[#8A1538] flex justify-end items-center px-6">
       {/* Search */}
@@ -19,6 +21,7 @@ export function TopBar() {
           variant="ghost"
           size="icon"
           className="bg-gray-200 rounded-full"
+          onClick={() => navigate("/dashboard/settings")}
         >
           <SettingsIcon className="text-blue-500 size-5" />
         </Button>
@@ -35,11 +38,13 @@ export function TopBar() {
         </NotificationsDrawer>
 
         {/* Profile */}
-        <img
-          src={profilePic}
-          alt="Profile"
-          className="h-10 w-10 rounded-full border object-cover"
-        />
+        <button onClick={() => navigate("/dashboard/profile")}>
+          <img
+            src={profilePic}
+            alt="Profile"
+            className="h-10 w-10 rounded-full border object-cover"
+          />
+        </button>
       </div>
     </div>
   );
