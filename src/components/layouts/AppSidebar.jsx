@@ -53,7 +53,7 @@ const menuItems = [
     icon: <FaQuestionCircle />,
   },
   {
-    label: "Help & Sipport",
+    label: "Help & Support",
     path: "/dashboard/support",
     icon: <FaQuestionCircle />,
   },
