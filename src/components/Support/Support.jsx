@@ -1,23 +1,7 @@
 import React from "react";
 import faq from "@/assets/faq.png";
 import faq1 from "@/assets/faq1.png";
-import { useNavigate } from "react-router-dom";
-const FaqCard = ({ label, icon, route }) => {
-  const navigate = useNavigate();
-
-  const handleClick = () => {
-    navigate(route);
-  };
-  return (
-    <div
-      onClick={handleClick}
-      className="flex items-center gap-12 px-5 py-3 bg-white rounded-lg shadow-sm border border-gray-200 w-full justify-start"
-    >
-      <img src={icon} alt="icon" className="w-6 h-6" />
-      <span className="text-[20px] font-medium text-black">{label}</span>
-    </div>
-  );
-};
+import { Link } from "react-router-dom";
 
 const FaqSection = () => {
   return (
@@ -33,12 +17,23 @@ const FaqSection = () => {
         </p>
       </div>
       <div className="bg-white p-6 rounded-xl border border-gray-200 flex justify-center gap-10">
-        <FaqCard label="FAQs" icon={faq} route="/dashboard/faq/cutomerfaq" />
-        <FaqCard
-          label="Contact Us"
-          icon={faq1}
-          route="/dashboard/faq/driverfaq"
-        />
+        {[
+          {
+            label: "FAQs",
+            icon: faq,
+            route: "/dashboard/faq",
+          },
+          { label: "Contact Us", icon: faq1, route: "/dashboard/contact/" },
+        ].map(({ label, icon, route }) => (
+          <Link to={route} key={label} className="w-full">
+            <div className="flex items-center gap-12 px-5 py-3 bg-white rounded-lg shadow-sm border border-gray-200 w-full justify-start">
+              <img src={icon} alt="icon" className="w-6 h-6" />
+              <span className="text-[20px] font-medium text-black">
+                {label}
+              </span>
+            </div>
+          </Link>
+        ))}
       </div>
     </>
   );
