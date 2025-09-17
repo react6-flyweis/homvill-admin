@@ -50,6 +50,7 @@ const EditCode = lazy(() => import("./components/PromoCode/EditCode"));
 const Review = lazy(() => import("./components/Review"));
 const Terms = lazy(() => import("./pages/Terms/Terms"));
 const Privacy = lazy(() => import("./pages/Privacy/Privacy"));
+const FAQ = lazy(() => import("./pages/Support/FAQ"));
 const Push = lazy(() => import("./pages/PushNotification/Push"));
 const CreatePushNotification = lazy(() =>
   import("./components/PushNotification/CreatePushNotification")
@@ -112,6 +113,7 @@ export const routes = [
   { path: "review", element: <Review /> },
   { path: "terms", element: <Terms /> },
   { path: "privacy", element: <Privacy /> },
+  { path: "faq", element: <FAQ /> },
   { path: "push", element: <Push /> },
   { path: "push/create", element: <CreatePushNotification /> },
   { path: "support", element: <Support /> },
