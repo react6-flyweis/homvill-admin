@@ -48,9 +48,10 @@ const PromoCode = lazy(() => import("./components/PromoCode/PromoCode"));
 const CreatePromo = lazy(() => import("./components/PromoCode/CreatePromo"));
 const EditCode = lazy(() => import("./components/PromoCode/EditCode"));
 const Review = lazy(() => import("./components/Review"));
-const Terms = lazy(() => import("./components/Terms"));
-const Privacy = lazy(() => import("./components/Privacy"));
-const Push = lazy(() => import("./components/PushNotification/Push"));
+const Push = lazy(() => import("./pages/PushNotification/Push"));
+const CreatePushNotification = lazy(() =>
+  import("./components/PushNotification/CreatePushNotification")
+);
 const Support = lazy(() => import("./components/Support/Support"));
 const NewUser = lazy(() => import("./pages/Users/NewUser"));
 const UserDetails = lazy(() => import("./components/Users/UserDetails"));
@@ -110,6 +111,7 @@ export const routes = [
   { path: "terms", element: <Terms /> },
   { path: "privacy", element: <Privacy /> },
   { path: "push", element: <Push /> },
+  { path: "push/create", element: <CreatePushNotification /> },
   { path: "support", element: <Support /> },
   { path: "users/newuser", element: <NewUser /> },
   { path: "users/:id", element: <UserDetails /> },
