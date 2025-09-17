@@ -62,6 +62,7 @@ const Otpverification = lazy(() =>
 );
 const NewPassword = lazy(() => import("./components/Forgot/NewPassword"));
 const ProfileDetails = lazy(() => import("./pages/Profile/ProfileDetails"));
+const Settings = lazy(() => import("./pages/Settings/Settings"));
 
 // Authentication/public routes
 export const authRoutes = [
@@ -113,6 +114,7 @@ export const routes = [
   { path: "users/newuser", element: <NewUser /> },
   { path: "users/:id", element: <UserDetails /> },
   { path: "profile", element: <ProfileDetails /> },
+  { path: "settings", element: <Settings /> },
 ];
 
 export default routes;
