@@ -48,6 +48,8 @@ const PromoCode = lazy(() => import("./components/PromoCode/PromoCode"));
 const CreatePromo = lazy(() => import("./components/PromoCode/CreatePromo"));
 const EditCode = lazy(() => import("./components/PromoCode/EditCode"));
 const Review = lazy(() => import("./components/Review"));
+const Terms = lazy(() => import("./pages/Terms/Terms"));
+const Privacy = lazy(() => import("./pages/Privacy/Privacy"));
 const Push = lazy(() => import("./pages/PushNotification/Push"));
 const CreatePushNotification = lazy(() =>
   import("./components/PushNotification/CreatePushNotification")
