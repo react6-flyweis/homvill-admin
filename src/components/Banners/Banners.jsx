@@ -84,11 +84,11 @@ export default function Banners() {
   };
 
   return (
-    <div className="p-">
+    <div className="">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Banners</h1>
+          <h1 className="text-lg font-bold">Banners</h1>
           <p className="text-gray-500 text-sm">
             Lorem Ipsum is simply dummy text of the printing and typesetting
             industry.

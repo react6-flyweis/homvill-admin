@@ -46,7 +46,7 @@ const AddSubAdmin = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="p-6">
+    <div>
       <h2 className="text-lg font-semibold mb-2">Add Sub-Admin</h2>
       <p className="text-sm text-gray-500 mb-4">
         Monitor any changes made to your project, view them and connect with

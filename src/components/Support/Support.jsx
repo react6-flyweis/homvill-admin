@@ -3,7 +3,7 @@ import faq from "@/assets/faq.png";
 import faq1 from "@/assets/faq1.png";
 import { Link } from "react-router-dom";
 
-const FaqSection = () => {
+export default function FaqSection() {
   return (
     <>
       <div>
@@ -37,6 +37,4 @@ const FaqSection = () => {
       </div>
     </>
   );
-};
-
-export default FaqSection;
+}
