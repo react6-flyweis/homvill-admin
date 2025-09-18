@@ -16,7 +16,7 @@ export default function AdminLayout() {
         <TopBar />
 
         {/* Page layout */}
-        <div className="flex-1 p-6">
+        <div className="flex-1 p-6 pt-4">
           <Outlet />
         </div>
       </SidebarInset>
