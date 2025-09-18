@@ -4,6 +4,7 @@ import { authRoutes, routes } from "./routes";
 import { LoadingScreen } from "./components/layouts/LoadingScreen";
 import AdminLayout from "./components/layouts/AdminLayout";
 import NotFoundPage from "./pages/Notfound";
+import AuthLayout from "@/components/layouts/AuthLayout";
 
 export default function App() {
   return (
@@ -14,7 +15,7 @@ export default function App() {
             <Route key={path} path={path} element={element} />
           ))}
         </Route>
-        <Route>
+        <Route element={<AuthLayout />}>
           {authRoutes.map(({ path, element }) => (
             <Route key={path} path={path} element={element} />
           ))}
