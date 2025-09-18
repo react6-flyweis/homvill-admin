@@ -1,5 +1,5 @@
 import React from "react";
-import ChatMessageBubble from "./ChatMessageBubble";
+import { ChatMessageBubble } from "./ChatMessageBubble";
 
 const ChatConversation = ({
   messages,
