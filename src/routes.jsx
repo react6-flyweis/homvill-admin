@@ -24,7 +24,7 @@ const Partners = lazy(() => import("./pages/Partners/Partners"));
 const Banners = lazy(() => import("./components/Banners/Banners"));
 const Social = lazy(() => import("./components/Banners/Social"));
 const New = lazy(() => import("./components/Banners/New"));
-const Chat = lazy(() => import("./components/Chat"));
+const Chat = lazy(() => import("./pages/Chat/Chat"));
 const ToursScheduled = lazy(() => import("./pages/Properties/ToursScheduled"));
 const TourPropertyDetails = lazy(() =>
   import("./pages/Properties/TourPropertyDetails")
@@ -56,10 +56,11 @@ const CreatePushNotification = lazy(() =>
   import("./components/PushNotification/CreatePushNotification")
 );
 const Support = lazy(() => import("./components/Support/Support"));
+const Contact = lazy(() => import("./pages/Support/Contact"));
 const NewUser = lazy(() => import("./pages/Users/NewUser"));
 const UserDetails = lazy(() => import("./components/Users/UserDetails"));
-const LoginPage = lazy(() => import("./components/Login"));
-const Signup = lazy(() => import("./components/Signup"));
+const LoginPage = lazy(() => import("./pages/Auth/Login"));
+const Signup = lazy(() => import("./pages/Auth/Signup"));
 const Forgot = lazy(() => import("./components/Forgot/Forgot"));
 const Otpverification = lazy(() =>
   import("./components/Forgot/Otpverification")
