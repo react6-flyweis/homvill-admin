@@ -117,6 +117,7 @@ export const routes = [
   { path: "push", element: <Push /> },
   { path: "push/create", element: <CreatePushNotification /> },
   { path: "support", element: <Support /> },
+  { path: "contact", element: <Contact /> },
   { path: "users/newuser", element: <NewUser /> },
   { path: "users/:id", element: <UserDetails /> },
   { path: "profile", element: <ProfileDetails /> },
