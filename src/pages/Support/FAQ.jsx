@@ -3,6 +3,7 @@ import { PlusCircleIcon } from "lucide-react";
 import { FAQCard } from "@/components/Support/FAQCard";
 import { FAQDialog } from "@/components/Support/FAQDialog";
 import { Button } from "@/components/ui/button";
+import { PageLayout } from "@/components/layouts/PageLayout";
 
 const faqData = [
   {
@@ -52,7 +53,22 @@ export default function FAQPage() {
   }
 
   return (
-    <div className=" space-y-4">
+    <PageLayout
+      title="FAQs"
+      description="Lorem Ipsum is simply dummy text of the printing and typesetting industry."
+      action={
+        <Button
+          variant="outline"
+          onClick={() => {
+            setEditing(null);
+            setOpen(true);
+          }}
+          className="hover:bg-primary hover:text-white"
+        >
+          Add A New FAQ <PlusCircleIcon size={16} />
+        </Button>
+      }
+    >
       <FAQDialog
         open={open}
         onOpenChange={(val) => {
@@ -63,26 +79,6 @@ export default function FAQPage() {
         initialValues={editing}
       />
 
-      <div>
-        <div className="flex items-center gap-3">
-          <h2 className="text-xl font-semibold">FAQs</h2>
-
-          <Button
-            variant="outline"
-            onClick={() => {
-              setEditing(null);
-              setOpen(true);
-            }}
-            className="hover:bg-primary hover:text-white"
-          >
-            Add A New FAQ <PlusCircleIcon size={16} />
-          </Button>
-        </div>
-        <p className="text-sm text-gray-500 mt-1 mb-4">
-          Lorem Ipsum is simply dummy text of the printing and typesetting
-          industry.
-        </p>
-      </div>
       {faqs.map((item) => (
         <FAQCard
           key={item.id}
@@ -91,6 +87,6 @@ export default function FAQPage() {
           onDelete={handleDelete}
         />
       ))}
-    </div>
+    </PageLayout>
   );
 }
