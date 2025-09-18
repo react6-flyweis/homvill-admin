@@ -53,7 +53,10 @@ const menuItems = [
 
 export const AppSidebar = () => {
   return (
-    <Sidebar collapsible="icon" className="bg-gray-50  border-r border-primary">
+    <Sidebar
+      collapsible="icon"
+      className="bg-gray-50  !border-r-2 border-primary"
+    >
       {/* <Sidebar className="shrink-0 w-60 bg-gray-50 border-r border-[#8A1538] flex flex-col"> */}
       {/* Logo */}
       <SidebarHeader className="p-6 flex items-center justify-center">
