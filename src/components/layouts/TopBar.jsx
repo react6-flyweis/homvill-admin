@@ -4,17 +4,23 @@ import { Button } from "../ui/button";
 import profilePic from "@/assets/home.svg";
 import { NotificationsDrawer } from "../Notifications/NotificationsDrawer";
 import { useNavigate } from "react-router-dom";
+import { Input } from "@/components/ui/input";
+import { SearchIcon } from "lucide-react";
 
 export function TopBar() {
   const navigate = useNavigate();
   return (
-    <div className="w-full  bg-white h-16 border-b border-[#8A1538] flex justify-end items-center px-6">
+    <div className="w-full py-2 flex justify-between items-center px-4 border-b-2 border-primary">
       {/* Search */}
-      {/* <input
-            type="text"
-            placeholder="Search..."
-            className="w-1/3 px-4 py-2 border rounded-lg text-sm bg-gray-50 focus:outline-none"
-          /> */}
+
+      <div className="relative w-1/3">
+        <SearchIcon className="size-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+        <Input
+          type="text"
+          placeholder="Search here..."
+          className="pl-10 h-8 bg-muted rounded-md border-0"
+        />
+      </div>
 
       <div className="flex items-center justify-end gap-4">
         <Button
