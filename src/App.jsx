@@ -5,12 +5,20 @@ import { LoadingScreen } from "./components/layouts/LoadingScreen";
 import AdminLayout from "./components/layouts/AdminLayout";
 import NotFoundPage from "./pages/Notfound";
 import AuthLayout from "@/components/layouts/AuthLayout";
+import { AuthWrapper } from "@/components/layouts/AuthWrapper";
 
 export default function App() {
   return (
     <Suspense fallback={<LoadingScreen />}>
       <Routes>
-        <Route path="/dashboard" element={<AdminLayout />}>
+        <Route
+          path="/dashboard"
+          element={
+            <AuthWrapper requireAuth>
+              <AdminLayout />
+            </AuthWrapper>
+          }
+        >
           {routes.map(({ path, element }) => (
             <Route key={path} path={path} element={element} />
           ))}
