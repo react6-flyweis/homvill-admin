@@ -1,18 +1,27 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, Navigate, Link } from "react-router-dom";
+import { useAuthStore } from "@/store/authStore";
 
 import logo from "@/assets/logo.svg";
 import houseImage from "@/assets/group.svg";
 
 export default function AuthLayout() {
+  const authStore = useAuthStore((state) => state);
+
+  if (authStore.token) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return (
     <div className="flex h-screen font-sans bg-[#D3DDE6]">
       {/* Left Side */}
       <div className="w-2/5 flex justify-center items-center relative">
         {/* Logo */}
-        <div className="absolute top-6 left-16">
-          <img src={logo} alt="Logo" className="w-[182px] h-[38px]" />
-        </div>
+        <Link to="/">
+          <div className="absolute top-6 left-16">
+            <img src={logo} alt="Logo" className="w-[182px] h-[38px]" />
+          </div>
+        </Link>
 
         {/* Fixed-size image */}
         <div className="flex-none mt-4">
