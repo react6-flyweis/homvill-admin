@@ -1,7 +1,9 @@
 import { Edit3, HomeIcon } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/store/authStore";
+import { useGetUserById } from "@/queries/user";
 
 const field = (label, value) => (
   <div className="w-1/2 px-2 mb-4">
@@ -15,6 +17,65 @@ const field = (label, value) => (
 );
 
 export default function ProfileDetails() {
+  const navigate = useNavigate();
+  const userFromStore = useAuthStore((s) => s.user);
+  const clearUser = useAuthStore((s) => s.clearUser);
+  const clearToken = useAuthStore((s) => s.clearToken);
+
+  const { data: user, isLoading } = useGetUserById(userFromStore.user_id);
+
+  function handleLogout() {
+    // clear auth state and navigate to login
+    try {
+      clearToken();
+      clearUser();
+    } finally {
+      navigate("/login");
+    }
+  }
+
+  const fullName = `${user?.Name || ""} ${user?.last_name || ""}`.trim() || "—";
+  const email = user?.email || "—";
+  const phone = user?.phone || "—";
+  const country = user?.Country_id?.Country_name || user?.Country || "—";
+  const city = user?.City_id?.City_name || user?.City || "—";
+
+  // Render skeleton while loading
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse" />
+          <div className="space-y-1">
+            <div className="w-48 h-5 bg-gray-200 rounded animate-pulse" />
+            <div className="w-64 h-3 bg-gray-100 rounded animate-pulse" />
+          </div>
+        </div>
+
+        <div className="relative">
+          <div className="flex gap-8">
+            <div className="flex-shrink-0 flex flex-col items-center">
+              <div className="w-24 h-24 rounded-full bg-gray-200 border animate-pulse" />
+            </div>
+
+            <div className="flex-1 pt-8">
+              <div className="w-40 h-6 bg-gray-200 rounded mb-4 animate-pulse" />
+
+              <div className="flex flex-wrap -mx-2">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="w-1/2 px-2 mb-4">
+                    <div className="w-24 h-3 bg-gray-200 rounded mb-2 animate-pulse" />
+                    <div className="w-full h-10 bg-white border rounded animate-pulse" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="">
       <div className="flex items-center gap-4 mb-6">
@@ -30,7 +91,7 @@ export default function ProfileDetails() {
           </p>
         </div>
         <div className="ml-auto">
-          <Button>Logout</Button>
+          <Button onClick={handleLogout}>Logout</Button>
         </div>
       </div>
 
@@ -49,13 +110,13 @@ export default function ProfileDetails() {
           <div className="flex-shrink-0 flex flex-col items-center ">
             <Avatar className="w-24 h-24 border">
               <AvatarImage
-                src={`https://picsum.photos/seed/${Math.floor(
-                  Math.random() * 10000
-                )}/200`}
+                src={user?.user_image}
                 alt="avatar"
                 referrerPolicy="no-referrer"
               />
-              <AvatarFallback>AV</AvatarFallback>
+              <AvatarFallback>
+                {((user?.Name?.charAt?.(0) || "") + (user?.last_name?.charAt?.(0) || "")) || "U"}
+              </AvatarFallback>
             </Avatar>
           </div>
 
@@ -64,15 +125,21 @@ export default function ProfileDetails() {
             <h3 className="text-xl font-bold mb-4">Profile Details</h3>
 
             <div className="flex flex-wrap -mx-2">
-              {field("Name", "Davis Vaccaro")}
-              {field("Date Of Birth", "12/12/1994")}
-              {field("Email Address", "example@gmail.com")}
-              {field("Address", "San Jose, California, USA")}
-              {field("Country", "USA")}
-              {field("Phone Number", "+1 9874 562103")}
-              {field("Gender", "Male")}
-              {field("Postal Code", "700001")}
-              {field("City", "San Jose")}
+              {field("Name", fullName)}
+              {field(
+                "Onboarding Date",
+                user?.OnboardingDate
+                  ? new Date(user.OnboardingDate).toLocaleDateString()
+                  : "—"
+              )}
+              {field("Email Address", email)}
+              {field("Address", city + ", " + country)}
+              {field("Country", country)}
+              {field("Phone Number", phone)}
+              {field("Gender", user?.gender || "—")}
+              {/*  */}
+              {field("City", city)}
+              {field("Employee ID", user?.Employee_id || "—")}
             </div>
           </div>
         </div>
