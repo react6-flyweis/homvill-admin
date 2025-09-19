@@ -1,14 +1,16 @@
 import { BellIcon, SettingsIcon } from "lucide-react";
 import { Button } from "../ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
-import profilePic from "@/assets/home.svg";
 import { NotificationsDrawer } from "../Notifications/NotificationsDrawer";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { SearchIcon } from "lucide-react";
+import { useAuthStore } from "@/store/authStore";
 
 export function TopBar() {
   const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
   return (
     <div className="w-full py-2 flex justify-between items-center px-4 border-b-2 border-primary">
       {/* Search */}
@@ -45,11 +47,16 @@ export function TopBar() {
 
         {/* Profile */}
         <button onClick={() => navigate("/dashboard/profile")}>
-          <img
-            src={profilePic}
-            alt="Profile"
-            className="h-10 w-10 rounded-full border object-cover"
-          />
+          <Avatar className="h-10 w-10 rounded-full border overflow-hidden">
+            <AvatarImage
+              src={user?.user_image}
+              alt={user?.name || "Profile"}
+              className="object-cover"
+            />
+            <AvatarFallback>
+              {user.Name.charAt(0) + user?.last_name?.charAt(0) || "??"}
+            </AvatarFallback>
+          </Avatar>
         </button>
       </div>
     </div>
