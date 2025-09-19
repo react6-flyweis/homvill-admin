@@ -1,61 +1,99 @@
 import React from "react";
-import logo from "@/assets/logo.svg"; // replace with your logo file
-import houseImage from "@/assets/group2.svg"; // replace with your left image
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-const LoginPage = () => {
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { RootFormErrors } from "@/components/RootFormErrors";
+import { useSendForgetPasswordOtp } from "@/queries/auth";
+import extractApiError from "@/lib/errorHandler";
+
+const forgotSchema = z.object({
+  email: z.string().email("Please provide a valid email"),
+});
+
+const Forgot = () => {
   const navigate = useNavigate();
 
+  const form = useForm({
+    resolver: zodResolver(forgotSchema),
+    defaultValues: { email: "" },
+  });
+
+  const mutation = useSendForgetPasswordOtp();
+
+  const onSubmit = async (values) => {
+    try {
+      const res = await mutation.mutateAsync({ email: values.email });
+      // navigate to OTP verification page and pass email in state
+      navigate("/forgot/otpverification", {
+        replace: true,
+        state: { email: values.email, otpResponse: res },
+      });
+    } catch (err) {
+      form.setError("root", {
+        message: extractApiError(err) || "An error Occurred.",
+      });
+    }
+  };
+
   return (
-    <div className="flex h-screen font-sans bg-[#D3DDE6]">
-      {/* Left Side */}
-      <div className="w-1/2 flex justify-center items-center relative">
-        {/* Logo */}
-        <div className="absolute top-6 left-16">
-          <img src={logo} alt="Logo" className="w-[182px] h-[38px]" />
-        </div>
+    <div className="max-w-md mx-auto">
+      <h2 className="text-[30px] text-center text-[#000000] font-semibold mb-2">
+        Forgot Password
+      </h2>
+      <p className="text-center text-gray-500 mb-6">
+        Input your email to recover password to access App Name account
+      </p>
 
-        {/* Fixed-size image */}
-        <div className="flex-none mt-4">
-          <img
-            src={houseImage}
-            alt="House"
-            className="w-auto h-[590px] object-contain"
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <RootFormErrors errors={form.formState.errors.root} />
+
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="block text-[16px] text-[#7C838A] mb-1">
+                  Email
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="email"
+                    placeholder="Enter your Email here"
+                    {...field}
+                    className="w-full px-4 py-3 border bg-[#F3F5F6] border-gray-300 rounded-lg text-sm h-12"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-      </div>
 
-      {/* Right Side */}
-      <div
-        style={{ fontFamily: "Poppins" }}
-        className="w-1/2 flex flex-col justify-center px-24 bg-white rounded-tl-2xl rounded-bl-2xl shadow-lg"
-      >
-        <div className="absolute top-6 right-6 text-sm text-gray-600 flex items-center gap-1">
-          English (US) <span className="text-xs">▼</span>
-        </div>
-
-        <h2 className="text-[26px] text-center text-[#000000] font-semibold mb-6">
-          Forgot Password
-        </h2>
-
-        <label className="block text-[20px] text-[#7C838A] mb-1">Email</label>
-        <input
-          type="email"
-          placeholder="Enter your Email here"
-          className="w-full mb-4 rounded-xl px-4 py-3 border bg-[#B0BAC340] border-gray-300 rounded-lg text-sm "
-        />
-
-        <div className="flex justify-center">
-          <button
-            onClick={() => navigate("/otp")}
-            className="w-[340px] bg-[#8A1538] text-white py-2 rounded-lg font-medium text-[24px]"
-          >
-            Continue
-          </button>
-        </div>
-      </div>
+          <div className="flex flex-col items-center">
+            <LoadingButton
+              type="submit"
+              isLoading={form.formState.isSubmitting || mutation.isLoading}
+              className="w-[340px] bg-[#8A1538] text-white py-2 rounded-lg font-medium text-[20px] h-12"
+            >
+              Continue
+            </LoadingButton>
+          </div>
+        </form>
+      </Form>
     </div>
   );
 };
 
-export default LoginPage;
+export default Forgot;
