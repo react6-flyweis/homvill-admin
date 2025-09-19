@@ -4,6 +4,7 @@ import { Outlet } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { TopBar } from "./TopBar";
 import { SidebarInset, SidebarProvider } from "../ui/sidebar";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function AdminLayout() {
   return (
@@ -19,6 +20,7 @@ export default function AdminLayout() {
         <div className="flex-1 p-6 pt-4">
           <Outlet />
         </div>
+        <Toaster />
       </SidebarInset>
     </SidebarProvider>
   );
