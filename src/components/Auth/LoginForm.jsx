@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -13,8 +13,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useAdminLogin } from "@/queries/auth";
+import { RootFormErrors } from "@/components/RootFormErrors";
+import { LoadingButton } from "@/components/ui/loading-button";
 
 const loginSchema = z.object({
   email: z.string().email("Please provide a valid email"),
@@ -22,7 +24,7 @@ const loginSchema = z.object({
   remember: z.boolean().optional(),
 });
 
-export function LoginForm({ onSubmit: onSubmitProp }) {
+export function LoginForm() {
   const navigate = useNavigate();
 
   const form = useForm({
@@ -30,18 +32,32 @@ export function LoginForm({ onSubmit: onSubmitProp }) {
     defaultValues: { email: "", password: "", remember: true },
   });
 
-  const onSubmit = (values) => {
-    if (onSubmitProp) {
-      onSubmitProp(values);
-    } else {
-      // Default behavior: navigate to dashboard
+  const mutation = useAdminLogin();
+
+  const onSubmit = async (values) => {
+    try {
+      await mutation.mutateAsync({
+        email: values.email,
+        password: values.password,
+        role_id: 2,
+      });
       navigate("/dashboard");
+    } catch (err) {
+      form.setError("root", { message: "An error occurred" });
     }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* form.formState.errors.root is an object like { message, ref } — pass only message or array */}
+        <RootFormErrors
+          errors={
+            form.formState.errors.root
+              ? form.formState.errors.root.message || form.formState.errors.root
+              : null
+          }
+        />
         <FormField
           control={form.control}
           name="email"
@@ -52,6 +68,7 @@ export function LoginForm({ onSubmit: onSubmitProp }) {
               </FormLabel>
               <FormControl>
                 <Input
+                  type="email"
                   placeholder="Enter your Email here"
                   {...field}
                   className="w-full mpx-4 py-3 border bg-[#B0BAC340] border-gray-300 rounded-lg text-sm h-12"
@@ -113,12 +130,13 @@ export function LoginForm({ onSubmit: onSubmitProp }) {
         </div>
 
         <div className="flex flex-col items-center">
-          <Button
+          <LoadingButton
             type="submit"
+            isLoading={form.formState.isSubmitting}
             className="w-[340px] bg-[#8A1538] text-white py-2 rounded-lg font-medium text-[24px] h-12"
           >
             Log In
-          </Button>
+          </LoadingButton>
         </div>
       </form>
     </Form>
