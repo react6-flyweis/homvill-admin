@@ -11,9 +11,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { AvatarUploader } from "@/components/Properties/AvatarUploader";
 import { PasswordInput } from "@/components/ui/password-input";
+import { toast } from "sonner";
 
 const schema = z.object({
   avatar: z.string().nullable(),
@@ -27,32 +27,80 @@ const schema = z.object({
   postalCode: z.string().optional(),
   country: z.string().optional(),
   city: z.string().optional(),
-  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
+import { useAuthStore } from "@/store/authStore";
+import { useGetUserById } from "@/queries/user";
+import { useUpdateUser } from "@/queries/user";
+import { useEffect } from "react";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { RootFormErrors } from "@/components/RootFormErrors";
 export default function Settings() {
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
       avatar: null,
-      firstName: "Davis",
-      lastName: "Vaccaro",
-      dateOfBirth: "1994-12-12",
-      phone: "+1 9874 562103",
-      email: "example@gmail.com",
-      gender: "Male",
-      address: "San Jose, California, USA",
-      postalCode: "700001",
-      country: "USA",
-      city: "San Jose",
-      password: "",
+      firstName: "",
+      lastName: "",
+      dateOfBirth: "",
+      phone: "",
+      email: "",
+      gender: "",
+      address: "",
+      postalCode: "",
+      country: "",
+      city: "",
     },
   });
 
-  const onSubmit = (data) => {
-    // Replace with actual save logic
-    // eslint-disable-next-line no-console
-    console.log("Saving settings", data);
+  // load authenticated user id from store
+  const authUser = useAuthStore((s) => s.user);
+  const userId = authUser?.user_id;
+
+  // fetch user data via existing query hook
+  const { data: apiUser } = useGetUserById(userId);
+
+  // when apiUser is available, map fields and reset the form
+  useEffect(() => {
+    if (!apiUser) return;
+
+    const user = apiUser;
+
+    const mapped = {
+      avatar: user.user_image || null,
+      firstName: user.Name || "",
+      lastName: user.last_name || "",
+      phone: user.phone || "",
+      email: user.email || "",
+      gender: user.gender || "",
+      address: "",
+      postalCode: "",
+      country: user.Country_id?.Country_name || "",
+      city: user.City_id?.City_name || "",
+      password: "",
+    };
+
+    form.reset(mapped);
+  }, [apiUser, form]);
+  const updateUser = useUpdateUser();
+
+  // submit handler: uses the shared query mutation
+  const onSubmit = async (data) => {
+    const payload = {
+      id: userId,
+      Name: data.firstName,
+      last_name: data.lastName,
+      ...data,
+    };
+    try {
+      await updateUser.mutateAsync(payload);
+      toast.success("Profile updated successfully");
+    } catch (error) {
+      form.setError("root", {
+        type: "manual",
+        message: extractApiError(error) || "Failed to update profile",
+      });
+    }
   };
 
   return (
@@ -225,11 +273,7 @@ export default function Settings() {
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <PasswordInput
-                          type="password"
-                          {...field}
-                          placeholder="Password"
-                        />
+                        <PasswordInput {...field} placeholder="Password" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -237,10 +281,16 @@ export default function Settings() {
                 />
               </div>
 
+              <RootFormErrors errors={form.formState.errors.root} />
+
               <div className="flex justify-center mt-6">
-                <Button type="submit" className="rounded w-40">
+                <LoadingButton
+                  isLoading={form.formState.isSubmitting}
+                  type="submit"
+                  className="rounded w-40"
+                >
                   Save
-                </Button>
+                </LoadingButton>
               </div>
             </form>
           </Form>
