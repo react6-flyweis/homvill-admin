@@ -3,6 +3,7 @@ import api from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
 
 const ADMIN_LOGIN = "/api/user/admin-login";
+const SEND_FORGOT_PASSWORD_OTP = "/api/user/forget-password/send-otp";
 
 async function adminLogin(payload) {
   const { data } = await api.post(ADMIN_LOGIN, payload);
@@ -17,5 +18,16 @@ export function useAdminLogin() {
       authStore.setToken(data.data.token);
       authStore.setUser(data.data.user);
     },
+  });
+}
+
+async function sendForgotPasswordOtp(payload) {
+  const { data } = await api.post(SEND_FORGOT_PASSWORD_OTP, payload);
+  return data;
+}
+
+export function useSendForgetPasswordOtp() {
+  return useMutation({
+    mutationFn: sendForgotPasswordOtp,
   });
 }
