@@ -2,7 +2,7 @@ import { lazy } from "react";
 import { Navigate } from "react-router-dom";
 
 const Overview = lazy(() => import("./components/Overview"));
-const UsersPage = lazy(() => import("./components/Users"));
+const UsersPage = lazy(() => import("./pages/Users/Users"));
 const AuditLogs = lazy(() => import("./components/AuditLogs"));
 const SubAdmin = lazy(() => import("./pages/SubAdmin/SubAdmin"));
 const SubAdminPermissions = lazy(() => import("./pages/SubAdmin/Permissions"));

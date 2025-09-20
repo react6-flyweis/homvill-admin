@@ -1,39 +1,59 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
-import { DataTable } from "./datatable/DataTable";
-import { usersColumns } from "./Users/usersColumns";
-import { generateUsers } from "./Users/usersData";
-import { ExportSelector } from "./datatable/ExportSelector";
+import { DataTable } from "@/components/datatable/DataTable";
+import { usersColumns } from "@/components/Users/usersColumns";
+import { ExportSelector } from "@/components/datatable/ExportSelector";
+import { useGetAllUsers } from "@/queries/user";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
+} from "@/components/ui/select";
 
 export default function UsersPage() {
   const [activeTab, setActiveTab] = useState("all");
   const [filter, setFilter] = useState("all");
-  const [data, setData] = useState([]);
 
   const tableRef = useRef();
 
-  useEffect(() => {
-    const users = generateUsers(10);
-    setData(users);
-  }, [activeTab]);
+  // fetch users
+  const { data: usersPayload = { items: [], count: 0 }, isLoading } =
+    useGetAllUsers();
+
+  // map API user shape to table shape expected by usersColumns
+  const data = (usersPayload.items || []).map((u) => ({
+    // prefer fields from API, fallback to placeholders
+    name: `${u.Name || u.name || "-"} ${u.last_name || ""}`.trim(),
+    id: u.user_id,
+    phone: u.phone || "-",
+    type:
+      (u.Role_id && u.Role_id.role_name) ||
+      (u.User_Category_id && u.User_Category_id.name) ||
+      "-",
+    email: u.email || "-",
+    date: u.OnboardingDate
+      ? new Date(u.OnboardingDate).toLocaleDateString()
+      : u.dateOfJoining
+      ? new Date(u.dateOfJoining).toLocaleDateString()
+      : "-",
+    verified: !!u.two_step_verification,
+    active: !!u.account_active,
+    // keep raw API object available without overwriting mapped keys
+    raw: u,
+  }));
 
   const tabs = [
-    { id: "all", label: "All Users", count: 840 },
-    { id: "buyers", label: "Buyers", count: 400 },
-    { id: "sellers", label: "Sellers", count: 365 },
-    { id: "renters", label: "Renters", count: 120 },
-    { id: "builders", label: "Builder", count: 95 },
-    { id: "contractors", label: "Contractor", count: 88 },
-    { id: "verified", label: "Verified Owners", count: 64 },
-    { id: "newowners", label: "New Owners", count: 47 },
+    { id: "all", label: "All Users", count: usersPayload.count || 0 },
+    // { id: "buyers", label: "Buyers", count: 400 },
+    // { id: "sellers", label: "Sellers", count: 365 },
+    // { id: "renters", label: "Renters", count: 120 },
+    // { id: "builders", label: "Builder", count: 95 },
+    // { id: "contractors", label: "Contractor", count: 88 },
+    // { id: "verified", label: "Verified Owners", count: 64 },
+    // { id: "newowners", label: "New Owners", count: 47 },
   ];
 
   return (
@@ -103,11 +123,11 @@ export default function UsersPage() {
       <div>
         <DataTable
           ref={tableRef}
-          tWrapperClassName=""
           columns={usersColumns}
           data={data}
           showPagination={true}
           pageSize={5}
+          loading={isLoading}
         />
       </div>
     </div>
