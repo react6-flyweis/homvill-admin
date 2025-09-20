@@ -4,6 +4,7 @@ import { useAuthStore } from "@/store/authStore";
 
 const GET_USER_BY_ID = (id) => `/api/user/getbyid/${id}`;
 const GET_ALL_USERS = () => `/api/user/getall`;
+const GET_USER_BY_AUTH = () => `/api/user/getbyauth`;
 
 async function fetchUserById(id) {
   const { data } = await api.get(GET_USER_BY_ID(id));
@@ -15,9 +16,12 @@ async function fetchAllUsers() {
   return data;
 }
 
-export function useGetUserById(id, options = {}) {
-  const authStore = useAuthStore();
+async function fetchUserByAuth() {
+  const { data } = await api.get(GET_USER_BY_AUTH());
+  return data;
+}
 
+export function useGetUserById(id, options = {}) {
   return useQuery({
     queryKey: ["user", id],
     queryFn: () => fetchUserById(id),
@@ -25,10 +29,29 @@ export function useGetUserById(id, options = {}) {
     select: (data) => data.data, // assuming API response shape { success: true, data: { ... } }
     onSuccess: (res) => {
       // API returns shape { success: true, data: { ... } }
-      // if (res && res.data) {
-      //   authStore.setUser(res.data);
-      // }
       if (options.onSuccess) options.onSuccess(res);
+    },
+    onError: (err) => {
+      if (options.onError) options.onError(err);
+    },
+    ...options,
+  });
+}
+
+// fetch authenticated user (uses session/token on the request)
+export function useGetUserByAuth(options = {}) {
+  const authStore = useAuthStore();
+
+  return useQuery({
+    queryKey: ["user", "auth"],
+    queryFn: () => fetchUserByAuth(),
+    // enabled true by default; callers can disable via options
+    enabled: options.enabled ?? true,
+    select: (data) => data.data, // assuming API response shape { success: true, data: { ... } }
+    onSuccess: (data) => {
+      authStore.setUser(data.user);
+
+      if (options.onSuccess) options.onSuccess(data);
     },
     onError: (err) => {
       if (options.onError) options.onError(err);
