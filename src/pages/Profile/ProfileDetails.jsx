@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/authStore";
-import { useGetUserById } from "@/queries/user";
+import { useGetUserByAuth } from "@/queries/user";
 
 const field = (label, value) => (
   <div className="w-1/2 px-2 mb-4">
@@ -18,11 +18,10 @@ const field = (label, value) => (
 
 export default function ProfileDetails() {
   const navigate = useNavigate();
-  const userFromStore = useAuthStore((s) => s.user);
   const clearUser = useAuthStore((s) => s.clearUser);
   const clearToken = useAuthStore((s) => s.clearToken);
 
-  const { data: user, isLoading } = useGetUserById(userFromStore.user_id);
+  const { data: user, isLoading } = useGetUserByAuth();
 
   function handleLogout() {
     // clear auth state and navigate to login
@@ -115,7 +114,8 @@ export default function ProfileDetails() {
                 referrerPolicy="no-referrer"
               />
               <AvatarFallback>
-                {((user?.Name?.charAt?.(0) || "") + (user?.last_name?.charAt?.(0) || "")) || "U"}
+                {(user?.Name?.charAt?.(0) || "") +
+                  (user?.last_name?.charAt?.(0) || "") || "U"}
               </AvatarFallback>
             </Avatar>
           </div>
