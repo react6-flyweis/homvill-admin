@@ -58,7 +58,7 @@ const CreatePushNotification = lazy(() =>
 const Support = lazy(() => import("./components/Support/Support"));
 const Contact = lazy(() => import("./pages/Support/Contact"));
 const NewUser = lazy(() => import("./pages/Users/NewUser"));
-const UserDetails = lazy(() => import("./components/Users/UserDetails"));
+const UserDetails = lazy(() => import("./pages/Users/UserDetails"));
 const LoginPage = lazy(() => import("./pages/Auth/Login"));
 const Signup = lazy(() => import("./pages/Auth/Signup"));
 const Forgot = lazy(() => import("./components/Forgot/Forgot"));
