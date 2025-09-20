@@ -58,6 +58,7 @@ const CreatePushNotification = lazy(() =>
 const Support = lazy(() => import("./components/Support/Support"));
 const Contact = lazy(() => import("./pages/Support/Contact"));
 const NewUser = lazy(() => import("./pages/Users/NewUser"));
+const EditUser = lazy(() => import("./pages/Users/EditUser"));
 const UserDetails = lazy(() => import("./pages/Users/UserDetails"));
 const LoginPage = lazy(() => import("./pages/Auth/Login"));
 const Signup = lazy(() => import("./pages/Auth/Signup"));
@@ -120,6 +121,7 @@ export const routes = [
   { path: "support", element: <Support /> },
   { path: "contact", element: <Contact /> },
   { path: "users/newuser", element: <NewUser /> },
+  { path: "users/:id/edit", element: <EditUser /> },
   { path: "users/:id", element: <UserDetails /> },
   { path: "profile", element: <ProfileDetails /> },
   { path: "settings", element: <Settings /> },
