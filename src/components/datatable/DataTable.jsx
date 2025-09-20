@@ -26,6 +26,7 @@ function DataTableInner(
     columns,
     data,
     showPagination = true,
+    loading = false,
     pageSize = 6, // Default page size
     // rowClassName can be a string or a function (row) => string
     rowClassName,
@@ -62,6 +63,11 @@ function DataTableInner(
   });
 
   useImperativeHandle(ref, () => table, [table]);
+  const visibleColumns = table.getVisibleFlatColumns?.()
+    ? table.getVisibleFlatColumns()
+    : columns;
+  const currentPageSize = table.getState().pagination?.pageSize ?? pageSize;
+  const currentRows = table.getRowModel().rows || [];
   const pageCount = table.getPageCount();
   return (
     <div className="space-y-4 border shadow-sm pb-4 rounded bg-white">
@@ -90,8 +96,23 @@ function DataTableInner(
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => {
+            {loading ? (
+              // Render 5 skeleton rows while loading
+              Array.from({ length: 5 }).map((_, rIdx) => (
+                <TableRow className="h-12 py-2" key={`skeleton-${rIdx}`}>
+                  {columns.map((col, cIdx) => (
+                    <TableCell
+                      className="h-12 px-5 py-2 border-r"
+                      key={`skeleton-cell-${rIdx}-${cIdx}`}
+                    >
+                      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded animate-pulse w-3/4" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : currentRows?.length ? (
+              // Render actual rows
+              currentRows.map((row) => {
                 const extraRowClass =
                   typeof rowClassName === "function"
                     ? rowClassName(row)
@@ -125,10 +146,32 @@ function DataTableInner(
                 </TableCell>
               </TableRow>
             )}
+
+            {/* Fill remaining rows on the page with empty cells to keep row count consistent */}
+            {!loading &&
+              currentRows.length > 0 &&
+              currentRows.length < currentPageSize &&
+              Array.from({ length: currentPageSize - currentRows.length }).map(
+                (_, eIdx) => (
+                  <TableRow className="h-12 py-2" key={`empty-${eIdx}`}>
+                    {visibleColumns.map((col, cIdx) => (
+                      <TableCell
+                        className="h-12 px-5 py-2 border-r"
+                        key={`empty-cell-${eIdx}-${cIdx}`}
+                      >
+                        {/* keep cell structure, empty content */}
+                        <div className="h-4 w-3/4" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                )
+              )}
           </TableBody>
         </Table>
       </div>
-      {showPagination && pageCount > 1 && <DataTablePagination table={table} />}
+      {showPagination && pageCount > 1 && !loading && (
+        <DataTablePagination table={table} />
+      )}
     </div>
   );
 }
