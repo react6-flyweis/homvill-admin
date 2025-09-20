@@ -50,14 +50,7 @@ export function LoginForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* form.formState.errors.root is an object like { message, ref } — pass only message or array */}
-        <RootFormErrors
-          errors={
-            form.formState.errors.root
-              ? form.formState.errors.root.message || form.formState.errors.root
-              : null
-          }
-        />
+        <RootFormErrors errors={form.formState.errors.root} />
         <FormField
           control={form.control}
           name="email"
