@@ -29,12 +29,16 @@ const schema = z.object({
   city: z.string().optional(),
 });
 
-import { useAuthStore } from "@/store/authStore";
-import { useGetUserById } from "@/queries/user";
-import { useUpdateUser } from "@/queries/user";
+import { useGetUserByAuth } from "@/queries/user";
 import { useEffect } from "react";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { RootFormErrors } from "@/components/RootFormErrors";
+import { CountrySelect } from "@/components/Users/CountrySelect";
+import { CitySelect } from "@/components/Users/CitySelect";
+import { useUpdateProfile } from "@/mutations/user";
+import { useAuthStore } from "@/store/authStore";
+import extractApiError from "@/lib/errorHandler";
+
 export default function Settings() {
   const form = useForm({
     resolver: zodResolver(schema),
@@ -52,13 +56,10 @@ export default function Settings() {
       city: "",
     },
   });
-
-  // load authenticated user id from store
   const authUser = useAuthStore((s) => s.user);
   const userId = authUser?.user_id;
 
-  // fetch user data via existing query hook
-  const { data: apiUser } = useGetUserById(userId);
+  const { data: apiUser } = useGetUserByAuth();
 
   // when apiUser is available, map fields and reset the form
   useEffect(() => {
@@ -82,7 +83,7 @@ export default function Settings() {
 
     form.reset(mapped);
   }, [apiUser, form]);
-  const updateUser = useUpdateUser();
+  const { mutateAsync } = useUpdateProfile();
 
   // submit handler: uses the shared query mutation
   const onSubmit = async (data) => {
@@ -93,7 +94,7 @@ export default function Settings() {
       ...data,
     };
     try {
-      await updateUser.mutateAsync(payload);
+      await mutateAsync(payload);
       toast.success("Profile updated successfully");
     } catch (error) {
       form.setError("root", {
@@ -245,7 +246,7 @@ export default function Settings() {
                     <FormItem>
                       <FormLabel>Country</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Country" />
+                        <CountrySelect {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -259,7 +260,7 @@ export default function Settings() {
                     <FormItem>
                       <FormLabel>City</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="City" />
+                        <CitySelect {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
