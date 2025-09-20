@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { AvatarUploader } from "@/components/Properties/AvatarUploader";
 import { PasswordInput } from "@/components/ui/password-input";
 import { toast } from "sonner";
+import { EditIcon } from "lucide-react";
+import { ChangePasswordDialog } from "@/components/Settings/ChangePasswordDialog";
 
 const schema = z.object({
   avatar: z.string().nullable(),
@@ -30,7 +32,7 @@ const schema = z.object({
 });
 
 import { useGetUserByAuth } from "@/queries/user";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { RootFormErrors } from "@/components/RootFormErrors";
 import { CountrySelect } from "@/components/Users/CountrySelect";
@@ -40,6 +42,8 @@ import { useAuthStore } from "@/store/authStore";
 import extractApiError from "@/lib/errorHandler";
 
 export default function Settings() {
+  const [pwdOpen, setPwdOpen] = useState(false);
+
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -274,7 +278,22 @@ export default function Settings() {
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <PasswordInput {...field} placeholder="Password" />
+                        <div className="flex items-center">
+                          <PasswordInput {...field} placeholder="Password" />
+                          <button
+                            type="button"
+                            aria-label="Change password"
+                            onClick={() => setPwdOpen(true)}
+                            className="ml-2 text-primary p-2 rounded hover:bg-gray-100"
+                          >
+                            <EditIcon />
+                          </button>
+
+                          <ChangePasswordDialog
+                            open={pwdOpen}
+                            onOpenChange={(v) => setPwdOpen(!!v)}
+                          />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
