@@ -3,9 +3,15 @@ import api from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
 
 const GET_USER_BY_ID = (id) => `/api/user/getbyid/${id}`;
+const GET_ALL_USERS = () => `/api/user/getall`;
 
 async function fetchUserById(id) {
   const { data } = await api.get(GET_USER_BY_ID(id));
+  return data;
+}
+
+async function fetchAllUsers() {
+  const { data } = await api.get(GET_ALL_USERS());
   return data;
 }
 
@@ -19,11 +25,32 @@ export function useGetUserById(id, options = {}) {
     select: (data) => data.data, // assuming API response shape { success: true, data: { ... } }
     onSuccess: (res) => {
       // API returns shape { success: true, data: { ... } }
-      if (res && res.data) {
-        authStore.setUser(res.data);
-      }
+      // if (res && res.data) {
+      //   authStore.setUser(res.data);
+      // }
       if (options.onSuccess) options.onSuccess(res);
     },
+    onError: (err) => {
+      if (options.onError) options.onError(err);
+    },
+    ...options,
+  });
+}
+
+export function useGetAllUsers(options = {}) {
+  return useQuery({
+    queryKey: ["users"],
+    queryFn: () => fetchAllUsers(),
+    // return both items and count so callers can show totals
+    select: (data) => ({
+      items: data?.data || [],
+      count:
+        typeof data?.count === "number"
+          ? data.count
+          : data?.data
+          ? data.data.length
+          : 0,
+    }),
     onError: (err) => {
       if (options.onError) options.onError(err);
     },
