@@ -3,9 +3,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { UserEditor } from "@/components/Users/UserEditor";
 import { SuccessDialog } from "@/components/ui/SuccessDialog";
-import { useGetUserById, useUpdateUser } from "@/queries/user";
+import { useGetUserById } from "@/queries/user";
 import { extractApiError } from "@/lib/errorHandler";
 import { toast } from "sonner";
+import { useUpdateUser } from "@/mutations/user";
 
 const EditUser = () => {
   const { id } = useParams();
