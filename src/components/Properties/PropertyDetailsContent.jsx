@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 
 import soldBanner from "@/assets/sold-banner.png";
 import rentedBanner from "@/assets/rented-banner.png";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function Field({ label, children }) {
   return (
@@ -33,7 +34,93 @@ export function PropertyDetailsContent({
   property,
   loading,
   error,
+  onRetry,
 }) {
+  // Render skeleton placeholders while loading
+  if (loading) {
+    return (
+      <div className="space-y-6 w-full">
+        {/* Top summary skeleton */}
+        <div className="p-4 bg-card rounded-md shadow-sm">
+          <div className="flex items-center gap-4">
+            <Skeleton className="w-20 h-20 rounded-full" rounded={false} />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="w-1/2 h-4" />
+              <Skeleton className="w-1/3 h-3" />
+            </div>
+            <div className="w-36">
+              <Skeleton className="w-full h-8" />
+            </div>
+          </div>
+        </div>
+
+        {/* Several card skeletons to mimic details */}
+        <div className="grid grid-cols-1 gap-4">
+          <div className="p-4 bg-card rounded-md shadow-sm">
+            <Skeleton className="w-full h-6 mb-3" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Skeleton className="h-10" />
+              <Skeleton className="h-10" />
+              <Skeleton className="h-10 md:col-span-2" />
+            </div>
+          </div>
+
+          <div className="p-4 bg-card rounded-md shadow-sm">
+            <Skeleton className="w-full h-6 mb-3" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Skeleton className="h-32 md:col-span-2" />
+            </div>
+          </div>
+
+          <div className="p-4 bg-card rounded-md shadow-sm">
+            <Skeleton className="w-full h-6 mb-3" />
+            <div className="flex flex-wrap gap-3">
+              <Skeleton className="w-24 h-8" />
+              <Skeleton className="w-24 h-8" />
+              <Skeleton className="w-24 h-8" />
+              <Skeleton className="w-24 h-8" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Render an error state when `error` prop is present
+  if (error) {
+    const message =
+      typeof error === "string"
+        ? error
+        : error?.message || "Something went wrong while loading the property.";
+
+    return (
+      <div className="w-full">
+        <Card className="border border-rose-200 bg-rose-50">
+          <CardHeader>
+            <div className="flex items-center justify-between w-full">
+              <CardTitle className="text-rose-700">Error</CardTitle>
+              <div className="text-sm text-rose-700">Failed to load</div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
+              <div className="flex-1 text-sm text-rose-800">{message}</div>
+              <div className="flex-shrink-0">
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    onRetry ? onRetry() : window.location.reload()
+                  }
+                >
+                  Retry
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   // derive status from property if available
   const statusFromProp = (
     property?.Properties_Status_id?.Pro_Status || ""
