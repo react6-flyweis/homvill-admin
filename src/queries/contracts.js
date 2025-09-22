@@ -41,6 +41,26 @@ export function useGetAllContractCompanies(options = {}) {
   });
 }
 
+// Contract enquiries
+const GET_ALL_CONTRACT_ENQUIRIES = () => `/api/contracts-enquiries/getall`;
+
+async function fetchAllContractEnquiries() {
+  const { data } = await api.get(GET_ALL_CONTRACT_ENQUIRIES());
+  return data;
+}
+
+export function useGetAllContractEnquiries(options = {}) {
+  return useQuery({
+    queryKey: ["contract-enquiries"],
+    queryFn: () => fetchAllContractEnquiries(),
+    select: (res) => ({ items: res?.data || [], count: res?.count || 0 }),
+    onError: (err) => {
+      if (options.onError) options.onError(err);
+    },
+    ...options,
+  });
+}
+
 // Contract categories
 const GET_ALL_CONTRACT_CATEGORIES = () => `/api/contracts-category/getall`;
 
