@@ -26,60 +26,23 @@ function Field({ label, children }) {
   );
 }
 
-const appliances = [
-  "Upgrading my home",
-  "Garbage Disposal",
-  "Refrigerator",
-  "Microwave",
-  "Dryer",
-  "Trash Compactor",
-  "Freezer",
-  "Range Oven",
-  "Washer",
-];
-
-const floors = ["Hardwood"];
-
-const others = [
-  "Security Systems",
-  "Patio/Balcony",
-  "Central Heating",
-  "Basement",
-  "Central AC",
-  "Furnished",
-  "Deck",
-  "Porch",
-  "Jetted Bathtub",
-  "Fireplace",
-  "Spa/Jacuzzi",
-  "Fenced Yard",
-  "Sprinkler System",
-  "Pool",
-];
-
-const parking = ["Garage Attached"];
-
-const rooms = [
-  "Breakfast Nik",
-  "Master Bath",
-  "Workshop",
-  "Dining Room",
-  "Mud Room AC",
-  "Solarium-Atrium",
-  "Family Room",
-  "Office",
-  "Sun Room",
-  "Laundry Room",
-  "Pantry",
-  "Walk-in Closet Yard",
-  "Library",
-  "Recreation Room",
-];
-
-const views = ["Water"];
-
-export function PropertyDetailsContent({ enquiry, tourDetails, contract }) {
-  const status = "available"; // possible values: 'available', 'rented', 'sold'
+export function PropertyDetailsContent({
+  enquiry,
+  tourDetails,
+  contract,
+  property,
+  loading,
+  error,
+}) {
+  // derive status from property if available
+  const statusFromProp = (
+    property?.Properties_Status_id?.Pro_Status || ""
+  ).toLowerCase();
+  let status = "available"; // possible values: 'available', 'rented', 'sold'
+  if (statusFromProp === "rent" || statusFromProp === "rented")
+    status = "rented";
+  else if (statusFromProp === "sold") status = "sold";
+  else status = property?.Status === false ? "sold" : "available";
 
   return (
     <div className="relative">
@@ -117,7 +80,13 @@ export function PropertyDetailsContent({ enquiry, tourDetails, contract }) {
                 {contract ? "Category" : "Available For"}
               </span>
               <div className="text-center bg-primary text-white w-44 py-0.5 rounded shadow-md">
-                {contract ? contract.category : "SALE"}
+                {contract
+                  ? contract.category
+                  : property?.Properties_for
+                  ? property.Properties_for.toUpperCase() === "SELL"
+                    ? "SALE"
+                    : property.Properties_for.toUpperCase()
+                  : "SALE"}
               </div>
             </div>
           </CardHeader>
@@ -136,12 +105,14 @@ export function PropertyDetailsContent({ enquiry, tourDetails, contract }) {
               {/* Address column */}
               <div className="flex-1">
                 <CardTitle className="text-base">
-                  Street Address: 47 W 13th St
+                  Street Address: {property?.Property_Address || "47 W 13th St"}
                 </CardTitle>
                 <CardDescription className="mt-1">
-                  City: New York
+                  City: {property?.Property_city || "New York"}
                 </CardDescription>
-                <CardDescription className="mt-1">Zip: 10011</CardDescription>
+                <CardDescription className="mt-1">
+                  Zip: {property?.Property_zip || "10011"}
+                </CardDescription>
               </div>
 
               {/* Owner column */}
@@ -149,15 +120,23 @@ export function PropertyDetailsContent({ enquiry, tourDetails, contract }) {
                 <div className="flex flex-col items-start md:items-end">
                   <div className="text-sm font-medium">
                     Owner Name:{" "}
-                    <span className="font-normal">Jakob Calzoni</span>
+                    <span className="font-normal">
+                      {[property?.Owner_Fist_name, property?.Owner_Last_name]
+                        .filter(Boolean)
+                        .join(" ") || "Jakob Calzoni"}
+                    </span>
                   </div>
                   <div className="mt-2 text-sm">
                     Phone No:{" "}
-                    <span className="font-normal">+1 7768 945 630</span>
+                    <span className="font-normal">
+                      {property?.Owner_phone_no || "+1 7768 945 630"}
+                    </span>
                   </div>
                   <div className="mt-1 text-sm">
                     Email ID:{" "}
-                    <span className="font-normal">example@gmail.com</span>
+                    <span className="font-normal">
+                      {property?.Owner_email || "example@gmail.com"}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -326,31 +305,48 @@ export function PropertyDetailsContent({ enquiry, tourDetails, contract }) {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field label="Category">
-                <Input defaultValue="Furnished Apartments" />
+                <Input
+                  defaultValue={
+                    property?.Properties_Category_id?.name ||
+                    "Furnished Apartments"
+                  }
+                />
               </Field>
               <Field label="Available For">
-                <Input defaultValue="SALE" />
+                <Input
+                  defaultValue={
+                    property?.Properties_for
+                      ? property.Properties_for.toUpperCase() === "SELL"
+                        ? "SALE"
+                        : property.Properties_for.toUpperCase()
+                      : "SALE"
+                  }
+                />
               </Field>
 
               <Field label="Finished Sq. Ft.">
-                <Input defaultValue="990" />
+                <Input
+                  defaultValue={property?.Property_finished_Sq_ft || "990"}
+                />
               </Field>
               <Field label="Bed Rooms">
-                <Input defaultValue="4" />
+                <Input defaultValue={property?.Property_Bed_rooms ?? "4"} />
               </Field>
 
               <Field label="Full Baths">
-                <Input defaultValue="2" />
+                <Input defaultValue={property?.Property_Full_Baths ?? "2"} />
               </Field>
               <Field label="1/2 Baths">
-                <Input defaultValue="1" />
+                <Input defaultValue={property?.Property_OneTwo_Baths ?? "1"} />
               </Field>
 
               <Field label="Year Build">
-                <Input defaultValue="1987" />
+                <Input defaultValue={property?.Property_year_build ?? "1987"} />
               </Field>
               <Field label="Plot Size">
-                <Input defaultValue="1000 Sq. Ft." />
+                <Input
+                  defaultValue={property?.Property_Plot_size || "1000 Sq. Ft."}
+                />
               </Field>
             </div>
           </CardContent>
@@ -365,25 +361,33 @@ export function PropertyDetailsContent({ enquiry, tourDetails, contract }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <Field label="Street Address">
-                  <Input defaultValue="47 W 13th St" />
+                  <Input
+                    defaultValue={property?.Property_Address || "47 W 13th St"}
+                  />
                 </Field>
                 <Field label="Zip">
-                  <Input defaultValue="10011" />
+                  <Input defaultValue={property?.Property_zip || "10011"} />
                 </Field>
                 <Field label="When do he want to sell">
-                  <Input defaultValue="> 3 months" />
+                  <Input
+                    defaultValue={property?.Property_Why_sell || "> 3 months"}
+                  />
                 </Field>
               </div>
 
               <div className="space-y-4">
                 <Field label="City">
-                  <Input defaultValue="New York" />
+                  <Input defaultValue={property?.Property_city || "New York"} />
                 </Field>
                 <Field label="Country">
-                  <Input defaultValue="USA" />
+                  <Input defaultValue={property?.Property_country || "USA"} />
                 </Field>
                 <Field label="Reason for selling">
-                  <Input defaultValue="Upgrading my home" />
+                  <Input
+                    defaultValue={
+                      property?.Property_Reason_Selling || "Upgrading my home"
+                    }
+                  />
                 </Field>
               </div>
             </div>
@@ -399,7 +403,20 @@ export function PropertyDetailsContent({ enquiry, tourDetails, contract }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <Field label="Listing Price">
-                  <Input defaultValue="$110,000" />
+                  <Input
+                    defaultValue={
+                      property?.Property_Listing_Price ??
+                      property?.Property_cost
+                        ? new Intl.NumberFormat("en-US", {
+                            style: "currency",
+                            currency: "USD",
+                          }).format(
+                            property.Property_Listing_Price ??
+                              property.Property_cost
+                          )
+                        : "$110,000"
+                    }
+                  />
                 </Field>
               </div>
 
@@ -422,12 +439,13 @@ export function PropertyDetailsContent({ enquiry, tourDetails, contract }) {
                 <Field label="Photos">
                   <div className="mt-2">
                     <PhotosCollage
-                      initialImages={[
-                        "https://images.unsplash.com/photo-1501183638714-8f3c5a6c5d1a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-                        "https://images.unsplash.com/photo-1494526585095-c41746248156?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-                        "https://images.unsplash.com/photo-1505691938895-1758d7feb511?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-                        "https://images.unsplash.com/photo-1493809842364-78817add7ffb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-                      ]}
+                      initialImages={
+                        property?.Property_photos?.length
+                          ? property.Property_photos.map((p) => p.image)
+                          : [
+                              "https://images.unsplash.com/photo-1501183638714-8f3c5a6c5d1a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                            ]
+                      }
                       preview={true}
                     />
                   </div>
@@ -447,7 +465,7 @@ export function PropertyDetailsContent({ enquiry, tourDetails, contract }) {
               <div>
                 <h4 className="text-sm font-medium mb-2">Appliances</h4>
                 <div className="flex flex-wrap gap-3">
-                  {appliances.map((a) => (
+                  {property?.Appliances?.map((a) => (
                     <label
                       key={a}
                       className="inline-flex items-center gap-2 text-sm"
@@ -462,7 +480,7 @@ export function PropertyDetailsContent({ enquiry, tourDetails, contract }) {
               <div>
                 <h4 className="text-sm font-medium mb-2">Floors</h4>
                 <div className="flex flex-wrap gap-3">
-                  {floors.map((f) => (
+                  {property?.floors?.map((f) => (
                     <label
                       key={f}
                       className="inline-flex items-center gap-2 text-sm"
@@ -477,7 +495,7 @@ export function PropertyDetailsContent({ enquiry, tourDetails, contract }) {
               <div>
                 <h4 className="text-sm font-medium mb-2">Others</h4>
                 <div className="flex flex-wrap gap-3">
-                  {others.map((o) => (
+                  {property?.others?.map((o) => (
                     <label
                       key={o}
                       className="inline-flex items-center gap-2 text-sm"
@@ -492,7 +510,7 @@ export function PropertyDetailsContent({ enquiry, tourDetails, contract }) {
               <div>
                 <h4 className="text-sm font-medium mb-2">Parking</h4>
                 <div className="flex flex-wrap gap-3">
-                  {parking.map((p) => (
+                  {property?.parking?.map((p) => (
                     <label
                       key={p}
                       className="inline-flex items-center gap-2 text-sm"
@@ -507,7 +525,7 @@ export function PropertyDetailsContent({ enquiry, tourDetails, contract }) {
               <div>
                 <h4 className="text-sm font-medium mb-2">Rooms</h4>
                 <div className="flex flex-wrap gap-3">
-                  {rooms.map((r) => (
+                  {property?.Rooms?.map((r) => (
                     <label
                       key={r}
                       className="inline-flex items-center gap-2 text-sm"
@@ -522,7 +540,7 @@ export function PropertyDetailsContent({ enquiry, tourDetails, contract }) {
               <div>
                 <h4 className="text-sm font-medium mb-2">Views</h4>
                 <div className="flex flex-wrap gap-3">
-                  {views.map((v) => (
+                  {property?.others?.map((v) => (
                     <label
                       key={v}
                       className="inline-flex items-center gap-2 text-sm"
