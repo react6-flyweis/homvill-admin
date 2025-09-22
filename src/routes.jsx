@@ -20,7 +20,7 @@ const ContractEnquiries = lazy(() =>
   import("./pages/Contracts/ContractEnquiries")
 );
 const ContractDetails = lazy(() => import("./pages/Contracts/ContractDetails"));
-const Partners = lazy(() => import("./pages/Partners/Partners"));
+const Partners = lazy(() => import("./pages/Contracts/Partners"));
 const Banners = lazy(() => import("./components/Banners/Banners"));
 const Social = lazy(() => import("./components/Banners/Social"));
 const New = lazy(() => import("./components/Banners/New"));
