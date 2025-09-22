@@ -4,9 +4,10 @@ import { DataTable } from "@/components/datatable/DataTable";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ExportSelector } from "@/components/datatable/ExportSelector";
-import { properties } from "@/components/Properties/propertyData";
 import { propertyColumns } from "@/components/Properties/columns";
 import { CategoryFilter } from "@/components/Properties/CategoryFilter";
+import { useGetAllProperties } from "@/queries/properties";
+
 import toursScheduledIcon from "@/assets/tours-scheduled.svg";
 
 const PropertyTable = () => {
@@ -15,7 +16,76 @@ const PropertyTable = () => {
   const [filter, setFilter] = useState("ALL");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
 
-  const filteredProperties = properties.filter(
+  const { data: apiData, isLoading } = useGetAllProperties();
+
+  // map API items to the local `properties` shape used by the table
+  const mapApiToProperty = (item) => {
+    const id = item.Properties_id || "";
+    const listedBy = [item.Owner_Fist_name, item.Owner_Last_name]
+      .filter(Boolean)
+      .join(" ");
+    const sellerId = item.CreateBy?.user_id || "";
+    const category = item.Properties_Category_id?.name || "Unknown";
+    const priceNum = item.Property_Listing_Price ?? item.Property_cost ?? 0;
+    const price = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(priceNum);
+
+    // available: prefer explicit `Properties_for` (Sell -> SALE, Rent -> RENT),
+    // fallback to Properties_Status_id.Pro_Status
+    const availableFromFor = item.Properties_for
+      ? item.Properties_for.toUpperCase() === "SELL"
+        ? "SALE"
+        : item.Properties_for.toUpperCase()
+      : null;
+    const availableFromStatus = item.Properties_Status_id?.Pro_Status
+      ? item.Properties_Status_id.Pro_Status.toUpperCase()
+      : null;
+    const available = availableFromFor || availableFromStatus || "ALL";
+
+    // status: map Pro_Status or boolean Status to available/rented/sold
+    const proStatus = (
+      item.Properties_Status_id?.Pro_Status || ""
+    ).toLowerCase();
+    let status = "available";
+    if (proStatus === "rent" || proStatus === "rented") status = "rented";
+    else if (proStatus === "sold") status = "sold";
+    else status = item.Status === false ? "sold" : "available";
+
+    const email = item.Owner_email || "";
+    const phone = item.Owner_phone_no || "";
+    const zipCode = item.Property_zip || "";
+    const address = [
+      item.Property_Address,
+      item.Property_city,
+      item.Property_state,
+    ]
+      .filter(Boolean)
+      .join(", ");
+    const active = !!item.Status;
+
+    return {
+      id,
+      listedBy,
+      sellerId,
+      category,
+      price,
+      available,
+      status,
+      email,
+      phone,
+      zipCode,
+      address,
+      active,
+    };
+  };
+
+  const sourceItems = apiData?.items?.length
+    ? apiData.items.map(mapApiToProperty)
+    : [];
+
+  const filteredProperties = sourceItems.filter(
     (p) =>
       (filter === "ALL" ? true : p.available === filter) &&
       (categoryFilter === "ALL" ? true : p.category === categoryFilter)
@@ -131,13 +201,14 @@ const PropertyTable = () => {
       {/* DataTable */}
       <div className="">
         <DataTable
+          loading={isLoading}
           ref={tableRef}
           columns={propertyColumns}
           data={filteredProperties}
           rowClassName={(row) =>
             row.original?.status !== "available" ? "bg-green-100" : ""
           }
-          showPagination={true}
+          pageSize={7}
         />
       </div>
     </div>
