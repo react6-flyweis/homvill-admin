@@ -21,6 +21,26 @@ export function useGetAllContractorPersons(options = {}) {
   });
 }
 
+// Contract companies (merged from contractCompanies.js)
+const GET_ALL_CONTRACT_COMPANIES = () => `/api/contracts-company/getall`;
+
+async function fetchAllContractCompanies() {
+  const { data } = await api.get(GET_ALL_CONTRACT_COMPANIES());
+  return data;
+}
+
+export function useGetAllContractCompanies(options = {}) {
+  return useQuery({
+    queryKey: ["contract-companies"],
+    queryFn: () => fetchAllContractCompanies(),
+    select: (res) => ({ items: res?.data || [], count: res?.count || 0 }),
+    onError: (err) => {
+      if (options.onError) options.onError(err);
+    },
+    ...options,
+  });
+}
+
 // Contract categories
 const GET_ALL_CONTRACT_CATEGORIES = () => `/api/contracts-category/getall`;
 
