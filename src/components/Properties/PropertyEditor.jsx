@@ -24,7 +24,7 @@ import {
   FormMessage,
 } from "../ui/form";
 import { PhotosCollage } from "./PhotosCollage";
-import {AvatarUploader} from "./AvatarUploader";
+import { AvatarUploader } from "./AvatarUploader";
 
 const categories = [
   "Furnished Apartments",
@@ -175,9 +175,67 @@ export function PropertyEditor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onSubmit = (data) => {
-    console.log("Validated data:", data);
-    // TODO: send to API
+  const onSubmit = async (data) => {
+    // Map form data to backend API shape
+    const payload = {
+      Properties_Status_id: data.available === "SALE" ? 2 : 1,
+      Properties_Category_id: 1, // TODO: map category to real id if available
+      Owner_Fist_name: data.firstName,
+      Owner_Last_name: data.lastName,
+      Owner_phone_no: data.phone,
+      Owner_email: data.email,
+      Property_cost: data.propertyCost ? Number(data.propertyCost) : undefined,
+      Property_year_build: data.yearBuild ? Number(data.yearBuild) : undefined,
+      Property_Plot_size: data.plotSize,
+      Property_finished_Sq_ft: data.finishedSqFt,
+      Property_Bed_rooms: data.bedRooms ? Number(data.bedRooms) : undefined,
+      Property_Full_Baths: data.fullBaths ? Number(data.fullBaths) : undefined,
+      Property_OneTwo_Baths: data.halfBaths
+        ? Number(data.halfBaths)
+        : undefined,
+      Property_Address: data.streetAddress,
+      Property_city: data.city,
+      Property_zip: data.zip,
+      Property_country: data.country,
+      Property_state: data.state || "",
+      Property_Why_sell: data.whenToSell,
+      Property_Reason_Selling: data.reasonForSelling,
+      Property_Listing_Price: data.listingPrice
+        ? Number(data.listingPrice)
+        : undefined,
+      Property_Listing_plot_size: data.listingPlotSize,
+      Property_Listing_Description: data.listingDescription,
+      Property_photos: (data.photos || [])
+        .filter(Boolean)
+        .map((p, idx) => ({ Title: `Photo ${idx + 1}`, image: p })),
+      Appliances: Object.entries(data.features || {})
+        .filter(([, v]) => v)
+        .map(([k]) => k),
+      floors: (floors || [])
+        .map((f) => slug(f))
+        .filter((k) => (data.features || {})[k]),
+      others: (others || [])
+        .map((o) => slug(o))
+        .filter((k) => (data.features || {})[k]),
+      parking: (parking || [])
+        .map((p) => slug(p))
+        .filter((k) => (data.features || {})[k]),
+      Rooms: (rooms || [])
+        .map((r) => slug(r))
+        .filter((k) => (data.features || {})[k]),
+    };
+
+    try {
+      // Delegate creation to parent via onCreate prop
+      if (typeof onCreate === "function") {
+        await onCreate(payload);
+      }
+    } catch (error) {
+      form.setError("root", {
+        type: "manual",
+        message: error.message || "Failed to create property",
+      });
+    }
   };
 
   return (
