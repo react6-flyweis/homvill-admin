@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAdminLogin } from "@/queries/auth";
+import { useAuthStore } from "@/store/authStore";
 import { RootFormErrors } from "@/components/RootFormErrors";
 import { LoadingButton } from "@/components/ui/loading-button";
 
@@ -33,9 +34,17 @@ export function LoginForm() {
   });
 
   const mutation = useAdminLogin();
+  const setRemember = useAuthStore((s) => s.setRemember);
 
   const onSubmit = async (values) => {
     try {
+      // ensure storage type is set before mutation writes persisted state
+      try {
+        setRemember(!!values.remember);
+      } catch (e) {
+        // ignore if storage is unavailable
+      }
+
       await mutation.mutateAsync({
         email: values.email,
         password: values.password,
