@@ -20,3 +20,23 @@ export function useGetAllContractorPersons(options = {}) {
     ...options,
   });
 }
+
+// Contract categories
+const GET_ALL_CONTRACT_CATEGORIES = () => `/api/contracts-category/getall`;
+
+async function fetchAllContractCategories() {
+  const { data } = await api.get(GET_ALL_CONTRACT_CATEGORIES());
+  return data;
+}
+
+export function useGetAllContractCategories(options = {}) {
+  return useQuery({
+    queryKey: ["contract-categories"],
+    queryFn: () => fetchAllContractCategories(),
+    select: (res) => ({ items: res?.data || [], count: res?.count || 0 }),
+    onError: (err) => {
+      if (options.onError) options.onError(err);
+    },
+    ...options,
+  });
+}
