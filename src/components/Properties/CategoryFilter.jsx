@@ -7,18 +7,14 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-
-const categories = [
-  "Furnished Apartments",
-  "Unfurnished Apartments",
-  "Furnished Home",
-  "Unfurnished Home",
-  "Penthouse",
-  "Studio Apartments",
-  "Furniture",
-];
+import { useGetAllCategories } from "@/queries/categories";
 
 export const CategoryFilter = ({ categoryFilter, setCategoryFilter }) => {
+  const { data: apiData, isLoading } = useGetAllCategories();
+  const categories = apiData?.items?.length
+    ? apiData.items.map((c) => c.name)
+    : [];
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
