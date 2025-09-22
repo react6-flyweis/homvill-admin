@@ -22,7 +22,7 @@ export const propertyColumns = [
                 variant="ghost"
                 size="icon"
                 onClick={() => setSoldDialogOpen(true)}
-                title="This property is sold"
+                title={`This property is ${data?.status}`}
                 className="absolute left-0"
               >
                 <img
