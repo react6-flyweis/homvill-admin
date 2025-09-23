@@ -3,84 +3,19 @@ import { Plus } from "lucide-react"; // for icons
 import { BannerCard } from "./BannerCard";
 import { BannerEditor } from "./BannerEditor";
 
-import fore1 from "@/assets/fore1.jpg";
-import fore2 from "@/assets/fore2.jpg";
-import fore3 from "@/assets/fore3.jpg";
-import fore4 from "@/assets/fore4.jpg";
-import fore5 from "@/assets/fore5.jpg";
-import fore6 from "@/assets/fore6.jpg";
-import fore7 from "@/assets/fore7.jpg";
-import fore8 from "@/assets/fore8.jpg";
 import { useNavigate } from "react-router-dom";
-
-const bannersData = [
-  {
-    id: 1,
-    category: "Buying",
-    headline: "How to Find a Foreclosure",
-    image: fore1,
-  },
-  {
-    id: 2,
-    category: "Financing",
-    headline: "HUD's Pre-Foreclosure Sales Program",
-    image: fore2,
-  },
-  {
-    id: 3,
-    category: "Financing",
-    headline: "What Are the Types of Foreclosure?",
-    image: fore3,
-  },
-  {
-    id: 4,
-    category: "Buying",
-    headline: "Overview of Buying a Foreclosure",
-    image: fore4,
-  },
-  {
-    id: 5,
-    category: "Buying",
-    headline: "Buying a Pre-Foreclosure Property",
-    image: fore5,
-  },
-  {
-    id: 6,
-    category: "Buying",
-    headline: "Buying a Home at a Foreclosure Auction",
-    image: fore6,
-  },
-  {
-    id: 7,
-    category: "Buying",
-    headline: "Buying a Foreclosure Contract",
-    image: fore7,
-  },
-  {
-    id: 8,
-    category: "Buying",
-    headline: "Foreclosure Financing",
-    image: fore8,
-  },
-];
+import { useGetAllBanners } from "@/queries/banner";
 
 export default function Banners() {
   const navigate = useNavigate();
 
   const [open, setOpen] = useState(false);
-
-  // banners are static sample data in this component. When the editor saves a new
-  // banner, we just push it into local state for demo purposes.
-  const [items, setItems] = useState(bannersData);
+  // fetch banners from API
+  const { data: bannersPayload = { items: [], count: 0 }, isLoading } =
+    useGetAllBanners();
 
   const handleSaveBanner = (values) => {
-    const next = {
-      id: items.length + 1,
-      category: values.category || "",
-      headline: values.headline || "",
-      image: undefined,
-    };
-    setItems((s) => [next, ...s]);
+    console.log("Saving banner with values:", values);
   };
 
   return (
@@ -109,20 +44,54 @@ export default function Banners() {
 
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {items.map((banner) => (
-          <BannerCard key={banner.id} banner={banner} />
-        ))}
+        {isLoading ? (
+          // show skeleton placeholders while loading
+          Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="animate-pulse border rounded-xl p-4 h-48 flex flex-col justify-between"
+            >
+              <div className="bg-gray-200 rounded-md h-28 w-full mb-3" />
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-3/4" />
+                <div className="h-3 bg-gray-200 rounded w-1/2" />
+              </div>
+            </div>
+          ))
+        ) : (
+          <>
+            {(bannersPayload.items || []).map((b, idx) => {
+              // map API banner shape to BannerCard expected shape
+              const mapped = {
+                id: b._id || b.Banners_id || idx,
+                category: b.Catetory_id || b.category || "",
+                headline: b.headline || b.Headline || "",
+                // construct image url if banner_image is provided, else fallback to sample
+                image: b.banner_image
+                  ? (import.meta.env.VITE_API_BASE || "") +
+                    "/uploads/" +
+                    b.banner_image
+                  : sampleImages[idx % sampleImages.length],
+                raw: b,
+              };
 
-        {/* Upload new banner card */}
-        <button
-          onClick={() => setOpen(true)}
-          className="flex items-center justify-center border-2 border-dashed border-[#8A1538] rounded-xl "
-        >
-          <div className="flex flex-col items-center text-[#8B1C32]">
-            <Plus size={24} />
-            <span className="mt-1 text-sm font-medium">Upload new banner</span>
-          </div>
-        </button>
+              return <BannerCard key={mapped.id} banner={mapped} />;
+            })}
+
+            {/* Upload new banner card */}
+            <button
+              onClick={() => setOpen(true)}
+              className="flex items-center justify-center border-2 border-dashed border-[#8A1538] rounded-xl "
+            >
+              <div className="flex flex-col items-center text-[#8B1C32]">
+                <Plus size={24} />
+                <span className="mt-1 text-sm font-medium">
+                  Upload new banner
+                </span>
+              </div>
+            </button>
+          </>
+        )}
       </div>
       <BannerEditor
         open={open}
