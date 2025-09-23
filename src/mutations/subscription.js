@@ -6,11 +6,33 @@ async function createSubscriptionApi(payload) {
   return data;
 }
 
+async function updateSubscriptionApi(payload) {
+  const { data } = await api.put("/api/subscriptions/update", payload);
+  return data;
+}
+
 export function useCreateSubscription(options = {}) {
   const qc = useQueryClient();
 
   return useMutation({
     mutationFn: createSubscriptionApi,
+    onSuccess: (res) => {
+      // invalidate subscriptions cache so lists refetch
+      qc.invalidateQueries({ queryKey: ["subscriptions"] });
+      if (options.onSuccess) options.onSuccess(res);
+    },
+    onError: (err) => {
+      if (options.onError) options.onError(err);
+    },
+    ...options,
+  });
+}
+
+export function useUpdateSubscription(options = {}) {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateSubscriptionApi,
     onSuccess: (res) => {
       // invalidate subscriptions cache so lists refetch
       qc.invalidateQueries({ queryKey: ["subscriptions"] });
