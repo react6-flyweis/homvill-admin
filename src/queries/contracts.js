@@ -21,6 +21,29 @@ export function useGetAllContractorPersons(options = {}) {
   });
 }
 
+// Get contractor person by id
+const GET_CONTRACTOR_PERSON_BY_ID = (id) =>
+  `/api/contracts-contractor-person/getbyid/${id}`;
+
+async function fetchContractorPersonById(id) {
+  if (!id) return null;
+  const { data } = await api.get(GET_CONTRACTOR_PERSON_BY_ID(id));
+  return data;
+}
+
+export function useGetContractorPersonById(id, options = {}) {
+  return useQuery({
+    queryKey: ["contractor-person", id],
+    queryFn: () => fetchContractorPersonById(id),
+    enabled: !!id,
+    select: (res) => res?.data,
+    onError: (err) => {
+      if (options.onError) options.onError(err);
+    },
+    ...options,
+  });
+}
+
 // Contract companies (merged from contractCompanies.js)
 const GET_ALL_CONTRACT_COMPANIES = () => `/api/contracts-company/getall`;
 
