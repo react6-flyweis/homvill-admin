@@ -11,7 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 
 /**
  * Reusable subscription form UI.
@@ -134,12 +134,13 @@ export function SubscriptionForm({ form, onSubmit, submitLabel = "Add" }) {
         </div>
 
         <div className="flex justify-center">
-          <Button
+          <LoadingButton
+            isLoading={form.formState.isSubmitting}
             type="submit"
             className="px-8 py-2 bg-[#8A1538] text-white rounded-md text-sm font-medium"
           >
             {submitLabel}
-          </Button>
+          </LoadingButton>
         </div>
       </form>
     </Form>
