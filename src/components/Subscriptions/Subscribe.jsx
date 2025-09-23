@@ -1,13 +1,53 @@
 import React from "react";
 import { Pencil } from "lucide-react";
 import { Plus } from "lucide-react";
+import { SubCard } from "./SubCard";
+import { useGetAllSubscriptions } from "@/queries/subscriptions";
 import { useNavigate } from "react-router-dom";
 
 export default function Subscriptions() {
   const navigate = useNavigate();
+  const {
+    data: subsData,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetAllSubscriptions();
+
+  const mapLinesToFeatures = (lines = []) =>
+    Array.isArray(lines)
+      ? lines.map((l) => `${l?.Feactue_name || "Feature"} x${l?.Quantity ?? 1}`)
+      : [];
+
+  const handleRetry = () => {
+    if (typeof refetch === "function") return refetch();
+    // fallback: full reload
+    window.location.reload();
+  };
 
   return (
     <div className="space-y-6">
+      {/* Error state */}
+      {isError ? (
+        <div className="rounded-md border border-red-200 bg-red-50 p-4 flex items-start justify-between">
+          <div>
+            <h3 className="text-sm font-semibold text-red-700">
+              Failed to load subscriptions
+            </h3>
+            <p className="text-sm text-red-600 mt-1">
+              There was an error fetching subscription data. Please try again.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleRetry}
+              className="px-3 py-1 bg-[#8A1538] text-white rounded-md text-sm font-medium shadow"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      ) : null}
       {/* Header */}
       <div className="flex justify-between items-start">
         {/* Left side: Title + Add New Subscription + description */}
@@ -39,120 +79,51 @@ export default function Subscriptions() {
         </button>
       </div>
 
-      {/* Subscription Cards */}
+      {/* Subscription Cards (render top 3 from API only) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Basic */}
-        <div className="relative rounded-lg p-[1px] shadow bg-gradient-to-bl from-[#FF6794] via-[#FFE6EE] to-[#FFFFFF]">
-          <div
-            style={{
-              border: "1px solid",
-              borderImageSource:
-                "linear-gradient(241.96deg, #FF6794 -7.86%, #FFE6EE 62.28%, #FFFFFF 132.41%)",
-              borderImageSlice: 1,
-            }}
-            className="rounded-lg p-5 bg-transparent"
-          >
-            {/* Tag */}
-            <span className="bg-[#FF9FBC6B] px-3 py-1 text-[14px] font-semibold text-pink-600 rounded-br-3xl absolute top-0 left-0 shadow">
-              Seller <span className="text-[#8A1538] text-[22px]">Basic</span>
-            </span>
-
-            {/* Features */}
-            <ul className="mt-10 space-y-1 text-sm text-[#1D1D1D]">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <li key={i} className="flex justify-between">
-                  Lorem Ipsum is simply dummy text <span>0{i + 1}</span>
-                </li>
-              ))}
-            </ul>
-
-            {/* Price & Button */}
-            <div className="mt-6 flex justify-between items-center">
-              <p className="text-lg font-bold text-[#8A1538]">$199 / mo</p>
-              <button
-                onClick={() => navigate(`/dashboard/subscribe/edit/${0}`)}
-                className="px-8 py-1 bg-[#8A1538] text-white rounded text-sm"
+        {isLoading
+          ? // show 3 skeleton cards
+            [0, 1, 2].map((n) => (
+              <div
+                key={`skeleton-card-${n}`}
+                className="p-4 bg-white rounded-md border animate-pulse h-40"
               >
-                Edit
-              </button>
-            </div>
-          </div>
-        </div>
+                <div className="h-6 bg-gray-200 rounded w-3/5 mb-3"></div>
+                <div className="h-4 bg-gray-200 rounded w-2/5 mb-2"></div>
+                <div className="flex gap-2 mt-4">
+                  <div className="h-8 bg-gray-200 rounded w-20"></div>
+                  <div className="h-8 bg-gray-200 rounded w-16"></div>
+                </div>
+              </div>
+            ))
+          : (Array.isArray(subsData?.items)
+              ? subsData.items.slice(0, 3)
+              : []
+            ).map((sub, i) => {
+              const role = Array.isArray(sub.Subscription_for)
+                ? sub.Subscription_for[0] || ""
+                : sub.Subscription_for || "";
 
-        <div className="relative rounded-lg p-[1px] shadow bg-gradient-to-bl from-[#FF6794] via-[#FFE6EE] to-[#FFFFFF]">
-          <div
-            style={{
-              border: "1px solid",
-              borderImageSource:
-                "linear-gradient(241.96deg, #FF6794 -7.86%, #FFE6EE 62.28%, #FFFFFF 132.41%)",
-              borderImageSlice: 1,
-            }}
-            className="rounded-lg p-5 bg-transparent"
-          >
-            {/* Tag */}
-            <span className="bg-[#FF9FBC6B] px-3 py-1 text-[14px] font-semibold text-pink-600 rounded-br-3xl absolute top-0 left-0 shadow">
-              Seller <span className="text-[#8A1538] text-[22px]">Gold</span>
-            </span>
+              const plan = sub.name || "";
+              const price =
+                typeof sub.price === "number"
+                  ? `$${sub.price} / mo`
+                  : sub.price || "";
+              const features = mapLinesToFeatures(sub.Lines || []);
+              const editId = sub?.Subscriptions_id ?? sub?._id ?? i;
+              const key = sub._id ?? `sub-${i}`;
 
-            {/* Features */}
-            <ul className="mt-10 space-y-1 text-sm text-[#1D1D1D]">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <li key={i} className="flex justify-between">
-                  Lorem Ipsum is simply dummy text <span>0{i + 1}</span>
-                </li>
-              ))}
-            </ul>
-
-            {/* Price & Button */}
-            <div className="mt-6 flex justify-between items-center">
-              <p className="text-lg font-bold text-[#8A1538]">$499 / mo</p>
-              <button
-                onClick={() => navigate(`/dashboard/subscribe/edit/${1}`)}
-                className="px-8 py-1 bg-[#8A1538] text-white rounded text-sm"
-              >
-                Edit
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Premium */}
-        <div className="relative rounded-lg p-[1px] shadow bg-gradient-to-bl from-[#FF6794] via-[#FFE6EE] to-[#FFFFFF]">
-          <div
-            style={{
-              border: "1px solid",
-              borderImageSource:
-                "linear-gradient(241.96deg, #FF6794 -7.86%, #FFE6EE 62.28%, #FFFFFF 132.41%)",
-              borderImageSlice: 1,
-            }}
-            className="rounded-lg p-5 bg-transparent"
-          >
-            {/* Tag */}
-            <span className="bg-[#FF9FBC6B] px-3 py-1 text-[14px] font-semibold text-pink-600 rounded-br-3xl absolute top-0 left-0 shadow">
-              Seller <span className="text-[#8A1538] text-[22px]">Premium</span>
-            </span>
-
-            {/* Features */}
-            <ul className="mt-10 space-y-1 text-sm text-[#1D1D1D]">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <li key={i} className="flex justify-between">
-                  Lorem Ipsum is simply dummy text <span>0{i + 1}</span>
-                </li>
-              ))}
-            </ul>
-
-            {/* Price & Button */}
-            <div className="mt-6 flex justify-between items-center">
-              <p className="text-lg font-bold text-[#8A1538]">$999 / mo</p>
-              <button
-                onClick={() => navigate(`/dashboard/subscribe/edit/${2}`)}
-                className="px-8 py-1 bg-[#8A1538] text-white rounded text-sm"
-              >
-                Edit
-              </button>
-            </div>
-          </div>
-        </div>
+              return (
+                <SubCard
+                  key={key}
+                  role={role}
+                  plan={plan}
+                  price={price}
+                  features={features}
+                  onEdit={() => navigate(`/dashboard/subscribe/edit/${editId}`)}
+                />
+              );
+            })}
       </div>
 
       {/* Subscription Table */}
@@ -169,92 +140,86 @@ export default function Subscriptions() {
             </tr>
           </thead>
           <tbody>
-            {[
-              {
-                name: "Basic",
-                price: "$199 / mo",
-                features: "03",
-                sub: "Buyer",
-                color: "text-[#8CAC0C]",
-              },
-              {
-                name: "Gold",
-                price: "$499 / mo",
-                features: "08",
-                sub: "Buyer",
-                color: "text-[#8CAC0C]",
-              },
-              {
-                name: "Premium",
-                price: "$999 / mo",
-                features: "15",
-                sub: "Buyer",
-                color: "text-[#8CAC0C]",
-              },
-              {
-                name: "Basic",
-                price: "$199 / mo",
-                features: "03",
-                sub: "Seller",
-                color: "text-[#001381]",
-              },
-              {
-                name: "Gold",
-                price: "$499 / mo",
-                features: "08",
-                sub: "Seller",
-                color: "text-[#001381]",
-              },
-              {
-                name: "Premium",
-                price: "$999 / mo",
-                features: "15",
-                sub: "Seller",
-                color: "text-[#001381]",
-              },
-              {
-                name: "Basic",
-                price: "$199 / mo",
-                features: "03",
-                sub: "Contractor",
-                color: "text-[#970076]",
-              },
-              {
-                name: "Gold",
-                price: "$599 / mo",
-                features: "07",
-                sub: "Contractor",
-                color: "text-[#970076]",
-              },
-            ].map((item, i) => (
-              <tr key={i} className="border-b  hover:bg-gray-50">
-                <td
-                  className="px-4 py-2 text-gray-800 border-r font-medium"
-                  style={{
-                    background:
-                      "linear-gradient(241.96deg, #FF6794 -7.86%, #FFE6EE 62.28%, #FFFFFF 132.41%)",
-                  }}
-                >
-                  {item.name}
-                </td>
+            {isLoading ? (
+              // skeleton table rows
+              [0, 1, 2, 3].map((n) => (
+                <tr key={`s-row-${n}`} className="border-b">
+                  <td className="px-4 py-3">
+                    <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="h-4 bg-gray-200 rounded w-48 animate-pulse"></div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="h-4 bg-gray-200 rounded w-12 animate-pulse"></div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="h-4 bg-gray-200 rounded w-6 animate-pulse"></div>
+                  </td>
+                </tr>
+              ))
+            ) : subsData?.items && subsData.items.length > 0 ? (
+              subsData.items.map((s, i) => {
+                const featuresArr = mapLinesToFeatures(s.Lines || []);
+                const totalFeatures = Array.isArray(s.Lines)
+                  ? s.Lines.reduce((acc, l) => acc + (l?.Quantity ?? 1), 0)
+                  : 0;
+                const priceStr =
+                  typeof s.price === "number"
+                    ? `$${s.price} / mo`
+                    : s.price || "-";
+                const subFor = Array.isArray(s.Subscription_for)
+                  ? s.Subscription_for.join(", ")
+                  : s.Subscription_for || "";
 
-                <td className="px-4 py-2 border-r text-gray-600">
-                  Lorem Ipsum is Simply Dummy Text...
-                </td>
-                <td className="px-4 py-2 border-r">{item.price}</td>
-                <td className="px-4 py-2 border-r">{item.features}</td>
-                <td className={`px-4 py-2  font-medium ${item.color}`}>
-                  {item.sub}
-                </td>
-                <td className="px-4 py-2 text-gray-500">
-                  <button
-                    onClick={() => navigate(`/dashboard/subscribe/edit/${i}`)}
-                  >
-                    <Pencil size={16} className="inline" />
-                  </button>
+                return (
+                  <tr key={s._id || i} className="border-b  hover:bg-gray-50">
+                    <td
+                      className="px-4 py-2 text-gray-800 border-r font-medium"
+                      style={{
+                        background:
+                          "linear-gradient(241.96deg, #FF6794 -7.86%, #FFE6EE 62.28%, #FFFFFF 132.41%)",
+                      }}
+                    >
+                      {s.name}
+                    </td>
+
+                    <td className="px-4 py-2 border-r text-gray-600">
+                      {featuresArr.length ? featuresArr.join(", ") : "-"}
+                    </td>
+                    <td className="px-4 py-2 border-r">{priceStr}</td>
+                    <td className="px-4 py-2 border-r">{totalFeatures}</td>
+                    <td className={`px-4 py-2  font-medium`}>{subFor}</td>
+                    <td className="px-4 py-2 text-gray-500">
+                      <button
+                        onClick={() =>
+                          navigate(
+                            `/dashboard/subscribe/edit/${
+                              s.Subscriptions_id ?? i
+                            }`
+                          )
+                        }
+                      >
+                        <Pencil size={16} className="inline" />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              // empty state when not loading & no items
+              <tr>
+                <td colSpan={6} className="px-4 py-6 text-center text-gray-600">
+                  No subscriptions found.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
