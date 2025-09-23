@@ -44,11 +44,13 @@ const contractColumns = [
   {
     id: "actions",
     header: "ACTION",
-    cell: () => (
+    cell: ({ row }) => (
       <div className="flex items-center justify-end gap-2">
-        <Button variant="ghost" size="icon" title="View">
-          <EyeIcon className="text-primary" size={16} />
-        </Button>
+        <Link to={`/dashboard/contracts/${row?.original?.id}`}>
+          <Button variant="ghost" size="icon" title="View">
+            <EyeIcon className="text-primary" size={16} />
+          </Button>
+        </Link>
         <Button variant="ghost" size="icon" title="Delete">
           <Trash2Icon className="text-destructive" size={16} />
         </Button>
@@ -66,19 +68,39 @@ export default function Contracts() {
 
   // Map API items to the local `contracts` shape used by the table
   const mapApiToContract = (item) => {
-    const contractorName = item.Contracts_Contractor_person_name ?? "-";
-    const contractorId = item.Contracts_Contractor_person_id ?? item._id ?? "-";
+    // Map fields from API response to table columns
+    const ownerName = item.owner ?? "-";
+    // property_id may be an object like { Properties_id: 1 }
+    const propertyId =
+      item.property_id?.Properties_id ?? item.property_id ?? "-";
+    // category_id may be an object like { Contracts_Category_id: 1 }
+    const category =
+      item.category_id?.Contracts_Category_id ?? item.category ?? "-";
+    const contact = item.contact ?? "-";
+    // contractor name/id may be in specific fields
+    const contractorName =
+      item.contractor || item.Contracts_Contractor_person_name || "-";
+    const contractorId =
+      item.Contracts_Contractor_person_id ?? item.contractor ?? item._id ?? "-";
+    // company may be nested inside company_id
+    const company =
+      item.company_id?.Contracts_Company_name ?? item.company ?? "-";
+    const cost = item.cost != null ? item.cost : "-";
+    const address = item.address ?? "-";
 
     return {
-      owner: "-",
-      property: contractorId,
-      category: "-",
-      contact: "-",
+      owner: ownerName,
+      property: String(propertyId),
+      category: String(category),
+      contact: String(contact),
       contractor: contractorName,
-      company: "-",
-      cost: "-",
-      address: "-",
-      id: String(contractorId),
+      company: company,
+      cost: String(cost),
+      address: address,
+      // Prefer Contracts_Contractor_person_id for the row id when available
+      id: String(
+        item.Contracts_Contractor_person_id ?? item._id ?? contractorId
+      ),
     };
   };
 
