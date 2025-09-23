@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 
 import { useForm } from "react-hook-form";
 import { SubscriptionForm } from "./SubscriptionForm";
+import { useCreateSubscription } from "@/mutations/subscription";
+import { toast } from "sonner";
 
 export default function AddSubscription() {
   const navigate = useNavigate();
@@ -19,6 +21,8 @@ export default function AddSubscription() {
     },
   });
 
+  const createSubscription = useCreateSubscription();
+
   useEffect(() => {
     let timer;
     if (isOpen) {
@@ -30,10 +34,32 @@ export default function AddSubscription() {
     return () => clearTimeout(timer);
   }, [isOpen, navigate]);
 
-  function onSubmit(data) {
-    // TODO: integrate with API
-    console.log("New subscription:", data);
-    setIsOpen(true);
+  async function onSubmit(data) {
+    // transform form data to API payload
+    // API expects: name, emozi, price, Lines: [{ Feactue_name, Quantity }], Subscription_for: [..], Feactue_name
+    const payload = {
+      name: data.subscriptionName,
+      emozi: data.emozi || "",
+      price: Number(data.price) || 0,
+      Lines: Array.isArray(data.features)
+        ? data.features.map((f) => ({
+            Feactue_name: f.name,
+            Quantity: f.quantity,
+          }))
+        : [],
+      Subscription_for: data.subscriptionFor ? [data.subscriptionFor] : [],
+      Feactue_name: data.subscriptionName || "",
+    };
+
+    try {
+      await createSubscription.mutateAsync(payload);
+      toast.success("Subscription created successfully");
+    } catch (error) {
+      form.setError("root", {
+        type: "manual",
+        message: error?.message || "Failed to create subscription",
+      });
+    }
   }
 
   return (
