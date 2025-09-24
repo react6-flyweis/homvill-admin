@@ -1,6 +1,5 @@
 import React, { useRef } from "react";
 import { DataTable } from "@/components/datatable/DataTable";
-import { Button } from "@/components/ui/button";
 import { DateRangeField } from "@/components/ui/date-range";
 import { ExportSelector } from "@/components/datatable/ExportSelector";
 import {
@@ -12,122 +11,9 @@ import {
   SelectLabel,
   SelectGroup,
 } from "@/components/ui/select";
-import { Trash2Icon, EyeIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-const data = [
-  {
-    date: "12/05/2024",
-    buyer: "Alena George",
-    seller: "Livia Curtis",
-    amount: "$660,000",
-    source: "subscription",
-    payment: "Online",
-    transaction: "147854123668",
-    status: "Completed",
-  },
-  {
-    date: "12/05/2024",
-    buyer: "Carter Franci",
-    seller: "Kaiya Korsgaard",
-    amount: "$660,000",
-    source: "adds",
-    payment: "Online",
-    transaction: "147856123586",
-    status: "Completed",
-  },
-  {
-    date: "12/05/2024",
-    buyer: "Jordyn Culhane",
-    seller: "Angel Carder",
-    amount: "$660,000",
-    source: "listing-boost",
-    payment: "Online",
-    transaction: "143654123586",
-    status: "Completed",
-  },
-  {
-    date: "12/05/2024",
-    buyer: "Alena George",
-    seller: "Livia Curtis",
-    amount: "$660,000",
-    source: "subscription",
-    payment: "Online",
-    transaction: "147854123668",
-    status: "Completed",
-  },
-  {
-    date: "12/05/2024",
-    buyer: "Carter Franci",
-    seller: "Kaiya Korsgaard",
-    amount: "$660,000",
-    source: "adds",
-    payment: "Online",
-    transaction: "147856123586",
-    status: "Completed",
-  },
-  {
-    date: "12/05/2024",
-    buyer: "Jordyn Culhane",
-    seller: "Angel Carder",
-    amount: "$660,000",
-    payment: "Online",
-    source: "adds",
-    transaction: "143654123586",
-    status: "Completed",
-  },
-  // Add more rows here (repeat for demo)
-  {
-    date: "01/06/2024",
-    buyer: "Maya Turner",
-    seller: "Owen Blake",
-    amount: "$1,200,000",
-    source: "boost-by-loan-providers",
-    payment: "Offline",
-    transaction: "158754123900",
-    status: "Completed",
-  },
-  {
-    date: "02/06/2024",
-    buyer: "Noah Bennett",
-    seller: "Emma Stone",
-    amount: "$850,500",
-    source: "subscription",
-    payment: "Online",
-    transaction: "158754124001",
-    status: "Completed",
-  },
-  {
-    date: "10/06/2024",
-    buyer: "Liam Walker",
-    seller: "Sophia Hill",
-    amount: "$420,250",
-    source: "adds",
-    payment: "Online",
-    transaction: "158754124102",
-    status: "Completed",
-  },
-  {
-    date: "15/06/2024",
-    buyer: "Olivia Martin",
-    seller: "Lucas Young",
-    amount: "$2,300,000",
-    source: "listing-boost",
-    payment: "Offline",
-    transaction: "158754124203",
-    status: "Pending",
-  },
-  {
-    date: "20/06/2024",
-    buyer: "Ethan Scott",
-    seller: "Ava King",
-    amount: "$995,000",
-    source: "subscription",
-    payment: "Online",
-    transaction: "158754124304",
-    status: "Completed",
-  },
-];
+import { earningsColumns } from "./EarningsColumns";
+import { useGetAllEarnings } from "@/queries/earnings";
 // columns will be defined inside the component so we can use `useNavigate` for actions
 const EarningsPage = () => {
   const navigate = useNavigate();
@@ -139,6 +25,53 @@ const EarningsPage = () => {
   const [sourceFilter, setSourceFilter] = React.useState("all");
   const [periodFilter, setPeriodFilter] = React.useState("yearly");
   const tableRef = useRef(null);
+
+  // use project's shared query hook
+  const {
+    data: apiRes = { items: [], count: 0 },
+    isLoading,
+    error,
+  } = useGetAllEarnings();
+  // map items from the query select into the table rows expected by the table
+  const tableData = (apiRes.items || []).map((item) => {
+    const iso = item.CreateAt || item.createdAt || item.CreateAt;
+    const dt = iso ? new Date(iso) : null;
+    const formatDate = (d) => {
+      if (!d || Number.isNaN(d.getTime())) return "";
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const yyyy = d.getFullYear();
+      return `${dd}/${mm}/${yyyy}`;
+    };
+
+    const amt =
+      item.Transaction_id && typeof item.Transaction_id.Amount !== "undefined"
+        ? Number(item.Transaction_id.Amount)
+        : item.Amount || 0;
+
+    const formattedAmount = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+    }).format(amt);
+
+    return {
+      date: formatDate(dt),
+      buyer: item.Buyer?.Name || item.Buyer?.name || "-",
+      seller: item.seller?.Name || item.seller?.name || "-",
+      amount: formattedAmount,
+      source: item.source || item.Source || "N/A",
+      payment: item.payment || item.Payment || "Online",
+      transaction:
+        (item.Transaction_id && item.Transaction_id.Transaction_id) ||
+        item.Transaction_id?.TransactionId ||
+        item.Transaction_id?.id ||
+        item._id ||
+        "",
+      status: item.Transaction_status || item.Status || "N/A",
+      originalApi: item,
+    };
+  });
   // Compute total earnings: parse amount strings like "$660,000" into numbers and sum
   const parseAmount = (amt) => {
     if (!amt) return 0;
@@ -149,7 +82,7 @@ const EarningsPage = () => {
   };
 
   // Apply filters to the data
-  const filteredData = data.filter((row) => {
+  const filteredData = (tableData || []).filter((row) => {
     // source filter
     if (sourceFilter && sourceFilter !== "all") {
       if (row.source !== sourceFilter) return false;
@@ -192,80 +125,6 @@ const EarningsPage = () => {
     currency: "USD",
     minimumFractionDigits: 2,
   }).format(totalEarningsNumber);
-
-  const columns = [
-    {
-      accessorKey: "date",
-      header: "DATE",
-      filterFn: (row, columnId, filterValue) => {
-        if (!filterValue || filterValue === "yearly") return true;
-        const date = row.getValue(columnId);
-        const parts = String(date).split("/");
-        const day = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10);
-        if (filterValue === "monthly") return month === 6;
-        if (filterValue === "weekly")
-          return month === 6 && day >= 10 && day <= 20;
-        return true;
-      },
-    },
-    {
-      accessorKey: "source",
-      header: "SOURCE",
-      // keep visible so the table can filter by it via ref; can be hidden later
-    },
-    {
-      accessorKey: "buyer",
-      header: "BUYER NAME",
-    },
-    {
-      accessorKey: "seller",
-      header: "SELLER NAME",
-    },
-    {
-      accessorKey: "amount",
-      header: "AMOUNT",
-      cell: (info) => <span className="font-medium">{info.getValue()}</span>,
-    },
-    {
-      accessorKey: "payment",
-      header: "PAYMENT MODE",
-    },
-    {
-      accessorKey: "transaction",
-      header: "TRANSACTION ID",
-    },
-    {
-      accessorKey: "status",
-      header: "STATUS",
-      cell: (info) => (
-        <span className="text-[#8A1538] font-medium">{info.getValue()}</span>
-      ),
-    },
-    {
-      id: "actions",
-      header: "ACTION",
-      cell: ({ row }) => (
-        <div className="flex justify-center ">
-          <Button
-            variant="ghost"
-            size="icon"
-            title="View"
-            onClick={() =>
-              navigate(
-                `/dashboard/earning/transaction/${row.original.transaction}`
-              )
-            }
-          >
-            <EyeIcon className="text-primary" />
-          </Button>
-          <Button variant="ghost" size="icon" title="Delete">
-            <Trash2Icon className="text-destructive" />
-          </Button>
-        </div>
-      ),
-    },
-  ];
 
   return (
     <div className="">
@@ -371,9 +230,10 @@ const EarningsPage = () => {
 
       <DataTable
         ref={tableRef}
-        columns={columns}
-        data={data}
-        showPagination={true}
+        loading={isLoading}
+        columns={earningsColumns}
+        data={tableData}
+        pageSize={7}
       />
     </div>
   );
