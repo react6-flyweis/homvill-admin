@@ -1,119 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { EyeIcon } from "lucide-react";
 
-import { UserQueryDialog } from "../../components/UsersQuery/UserQueryDialog";
-import QueryRectifiedDialog from "../../components/UsersQuery/QueryRectifiedDialog";
-import { Button } from "../../components/ui/button";
+import { UserQueryDialog } from "@/components/UsersQuery/UserQueryDialog";
+import QueryRectifiedDialog from "@/components/UsersQuery/QueryRectifiedDialog";
+import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/datatable/DataTable";
 import tick from "@/assets/mdi_tick-all.svg";
+import { useGetAllUserQueries } from "@/queries/userQueries";
 
-const data = [
-  {
-    date: "12/05/2024",
-    user: "Ujaya Devei",
-    contact: "+91 92389 38923",
-    mail: "example@gmail.com",
-    query: "Lorem Ipsum is Simply Dummy Text Of The Printing Industry",
-  },
-  {
-    date: "12/05/2024",
-    user: "Carter Franci",
-    contact: "+91 92389 38923",
-    mail: "example@gmail.com",
-    query: "Lorem Ipsum is Simply Dummy Text Of The Printing Industry",
-  },
-  {
-    date: "12/05/2024",
-    user: "Jordyn Culhane",
-    contact: "+91 92389 38923",
-    mail: "example@gmail.com",
-    query: "Lorem Ipsum is Simply Dummy Text Of The Printing Industry",
-  },
-  {
-    date: "13/05/2024",
-    user: "Aaliyah Smith",
-    contact: "+44 7700 900123",
-    mail: "aaliyah.smith@example.co.uk",
-    query:
-      "I need information about listing my 2-bedroom flat. Please call me back between 4-6pm.",
-  },
-  {
-    date: "14/05/2024",
-    user: "Miguel Alvarez",
-    contact: "+52 1 55 1234 5678",
-    mail: "miguel@example.mx",
-    query:
-      "Interested in renting. What are the pet policies and deposit requirements?",
-  },
-  {
-    date: "15/05/2024",
-    user: "Chen Wei",
-    contact: "+86 138 0013 8000",
-    mail: "chen.wei@example.cn",
-    query:
-      "Is the property still available? Also, can I schedule a viewing this weekend?",
-  },
-  {
-    date: "16/05/2024",
-    user: "Fatima Khan",
-    contact: "+971 50 123 4567",
-    mail: "fatima.k@example.ae",
-    query:
-      "Please share more photos of the kitchen and bathroom. Also interested in long-term lease options.",
-  },
-  {
-    date: "17/05/2024",
-    user: "Liam O'Connor",
-    contact: "+353 87 123 4567",
-    mail: "liam.oconnor@example.ie",
-    query:
-      "Looking for a furnished unit close to public transport. Any recommendations?",
-  },
-  {
-    date: "18/05/2024",
-    user: "Sofia Rossi",
-    contact: "+39 345 678 9012",
-    mail: "sofia.rossi@example.it",
-    query:
-      "Can I get details about the neighborhood and nearby schools? Long query to test truncation in the table cell: this should be truncated appropriately in the UI to keep the layout intact.",
-  },
-  {
-    date: "19/05/2024",
-    user: "Noah Brown",
-    contact: "+1 415-555-0123",
-    mail: "noah.brown@example.com",
-    query: "Is there parking available with the unit?",
-  },
-  {
-    date: "20/05/2024",
-    user: "Olivia Martinez",
-    contact: "+34 612 345 678",
-    mail: "olivia.m@example.es",
-    query: "What's the process to submit an offer?",
-  },
-  {
-    date: "21/05/2024",
-    user: "Ethan Patel",
-    contact: "+91 98765 43210",
-    mail: "ethan.patel@example.in",
-    query:
-      "I have a few documents to submit. Can you share the preferred format?",
-  },
-  {
-    date: "22/05/2024",
-    user: "Isabella Garcia",
-    contact: "+52 55 7654 3210",
-    mail: "isabella.g@example.mx",
-    query:
-      "Seeking more information on financing options and estimated closing costs.",
-  },
-];
+// initial placeholder while data loads
 
 // Move columns inside the component so we can capture component state/handlers
 export default function UsersQueryPage() {
-  const [rows, setRows] = React.useState(
-    data.map((d) => ({ ...d, resolved: false }))
-  );
+  const { data: apiData, isLoading, isError } = useGetAllUserQueries();
+
+  // map API items to table rows whenever apiData changes
+  const [rows, setRows] = React.useState([]);
+
+  useEffect(() => {
+    if (!apiData) return;
+
+    const items = apiData.items || [];
+    const mapped = items.map((it) => {
+      // API fields: CreateAt, user_name, user_contact, user_email, Query_txt, Status
+      const date = it.CreateAt
+        ? new Date(it.CreateAt).toLocaleDateString()
+        : "";
+      const user = it.user_name || (it.user_id && it.user_id.Name) || "";
+      const contact = it.user_contact || "";
+      const mail = it.user_email || (it.user_id && it.user_id.email) || "";
+      const query = it.Query_txt || "";
+      const resolved = !!it.Status;
+
+      return { ...it, date, user, contact, mail, query, resolved };
+    });
+
+    setRows(mapped);
+  }, [apiData]);
   const [rectifyOpen, setRectifyOpen] = React.useState(false);
   const [activeRowIndex, setActiveRowIndex] = React.useState(null);
 
@@ -179,6 +102,14 @@ export default function UsersQueryPage() {
       },
     },
   ];
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    return <div>Failed to load user queries.</div>;
+  }
 
   return (
     <div className="">
