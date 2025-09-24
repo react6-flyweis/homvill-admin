@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useCreatePromoCode } from "@/mutations/promoCodes";
+import { useCreatePromoCode } from "@/mutations/promoCode";
 import { LoadingButton } from "@/components/ui/loading-button";
 import extractApiError from "@/lib/errorHandler";
 import { RootFormErrors } from "@/components/RootFormErrors";
