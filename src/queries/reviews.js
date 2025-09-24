@@ -20,3 +20,24 @@ export function useGetAllReviewTypes(options = {}) {
     ...options,
   });
 }
+
+// Reviews
+const GET_ALL_REVIEWS = () => `/api/reviews/getall`;
+
+async function fetchAllReviews() {
+  const { data } = await api.get(GET_ALL_REVIEWS());
+  return data;
+}
+
+export function useGetAllReviews(options = {}) {
+  return useQuery({
+    queryKey: ["reviews"],
+    queryFn: () => fetchAllReviews(),
+    // Normalize to { items: [], count: 0 }
+    select: (res) => ({ items: res?.data || [], count: res?.count || 0 }),
+    onError: (err) => {
+      if (options.onError) options.onError(err);
+    },
+    ...options,
+  });
+}
