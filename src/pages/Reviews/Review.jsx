@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import home from "@/assets/home.jpg";
-import { ReviewCard } from "./ReviewCard";
-import { ReviewTypeFilter } from "./ReviewTypeFilter";
+import { ReviewCard } from "@/components/Reviews/ReviewCard";
+import { ReviewTypeFilter } from "@/components/Reviews/ReviewTypeFilter";
 import { useGetAllReviews } from "@/queries/reviews";
 
 const mapApiToCard = (r) => {
