@@ -2,52 +2,33 @@ import { useState } from "react";
 import { PlusCircleIcon } from "lucide-react";
 import { TermsCard } from "@/components/Terms/TermsCard";
 import { TermDialog } from "@/components/Terms/TermDialog";
+import { TermsViewDialog } from "@/components/Terms/TermsViewDialog";
 import { Button } from "@/components/ui/button";
+import { useGetAllTerms } from "@/queries/terms";
 
-const termsData = [
-  {
-    id: 1,
-    title: "Terms & Conditions Title",
-    description: `Welcome to Homewirl. By accessing or using our services—whether through our website, app, or in-person interactions—you agree to comply with and be bound by the following Terms and Conditions. Please read them carefully.
-1. Service Usage
-Homewirl provides real estate services including property listings, buying, selling, renting, and related administrative support. All users must ensure that any information provided is accurate and not misleading.
-2. Property Listings
-All property details are subject to verif...`,
-  },
-  {
-    id: 2,
-    title: "Terms & Conditions Title",
-    description: `Welcome to Homewirl. By accessing or using our services—whether through our website, app, or in-person interactions—you agree to comply with and be bound by the following Terms and Conditions. Please read them carefully.
-1. Service Usage
-Homewirl provides real estate services including property listings, buying, selling, renting, and related administrative support. All users must ensure that any information provided is accurate and not misleading.
-2. Property Listings
-All property details are subject to verif...`,
-  },
-];
+export default function Terms() {
+  const { data: apiData = { items: [], count: 0 }, isLoading } =
+    useGetAllTerms();
 
-export default function () {
-  const [terms, setTerms] = useState(termsData);
+  // Normalize API items to the shape expected by the UI components.
+  // API examples use fields like `_id`, `terms_Condition_id`, `terms_Condition_Title`, `Description`, `Status`, `CreateBy`, `CreateAt`, `UpdatedAt`.
+  const terms = (apiData.items || []).map((it) => ({
+    id: it.terms_Condition_id || it.id || Math.random().toString(36).slice(2),
+    title:
+      it.terms_Condition_Title || it.terms_Condition_title || it.title || "",
+    description: it.Description || it.description || "",
+    Status: typeof it.Status === "boolean" ? it.Status : it.status ?? true,
+    // API may use `CreateBy` object or `createdBy` key
+    createdBy: it.CreateBy || it.createdBy || null,
+    createdAt:
+      it.CreateAt || it.CreatedAt || it.createdAt || it.created_at || null,
+    updatedAt: it.UpdatedAt || it.updatedAt || it.updated_at || null,
+    raw: it,
+  }));
+
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
-
-  function handleAdd(values) {
-    if (editing) {
-      // update existing
-      setTerms((s) =>
-        s.map((t) =>
-          t.id === editing.id ? { ...t, ...values, id: editing.id } : t
-        )
-      );
-      setEditing(null);
-    } else {
-      const next = {
-        id: Date.now(),
-        title: values.title,
-        description: values.description,
-      };
-      setTerms((s) => [next, ...s]);
-    }
-  }
+  const [viewing, setViewing] = useState(null);
 
   function handleEdit(item) {
     setEditing(item);
@@ -55,7 +36,7 @@ export default function () {
   }
 
   function handleDelete(id) {
-    setTerms((s) => s.filter((t) => t.id !== id));
+    console.log("Delete term with id:", id);
   }
 
   return (
@@ -64,10 +45,8 @@ export default function () {
         open={open}
         onOpenChange={(val) => {
           setOpen(val);
-          // if dialog closed, clear editing
           if (!val) setEditing(null);
         }}
-        onSubmit={handleAdd}
         initialValues={editing}
       />
 
@@ -78,7 +57,6 @@ export default function () {
           <Button
             variant="outline"
             onClick={() => {
-              // clear any existing editing state when opening the Add dialog
               setEditing(null);
               setOpen(true);
             }}
@@ -93,14 +71,36 @@ export default function () {
           industry.
         </p>
       </div>
-      {terms.map((item) => (
-        <TermsCard
-          key={item.id}
-          data={item}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
-      ))}
+      {isLoading
+        ? // show skeleton placeholders while loading
+          Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="animate-pulse border rounded-xl p-4 h-28 flex flex-col justify-between"
+            >
+              <div className="bg-gray-200 rounded-md h-6 w-3/4 mb-2" />
+              <div className="space-y-2">
+                <div className="h-3 bg-gray-200 rounded w-full" />
+                <div className="h-3 bg-gray-200 rounded w-5/6" />
+              </div>
+            </div>
+          ))
+        : terms.map((item) => (
+            <TermsCard
+              key={item.id}
+              data={item}
+              onView={() => setViewing(item)}
+              onEdit={() => handleEdit(item)}
+              onDelete={(id) => handleDelete(id)}
+            />
+          ))}
+      <TermsViewDialog
+        open={!!viewing}
+        onOpenChange={(v) => {
+          if (!v) setViewing(null);
+        }}
+        data={viewing}
+      />
     </div>
   );
 }
