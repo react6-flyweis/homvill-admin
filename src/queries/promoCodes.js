@@ -19,3 +19,22 @@ export function useGetAllPromoCodes(options = {}) {
     ...options,
   });
 }
+
+const GET_PROMO_BY_ID = (id) => `/api/promo-code/getbyid/${id}`;
+
+async function fetchPromoById(id) {
+  const { data } = await api.get(GET_PROMO_BY_ID(id));
+  return data;
+}
+
+export function useGetPromoById(id, options = {}) {
+  return useQuery({
+    queryKey: ["promoCodes", id],
+    queryFn: () => fetchPromoById(id),
+    enabled: !!id,
+    onError: (err) => {
+      if (options.onError) options.onError(err);
+    },
+    ...options,
+  });
+}
