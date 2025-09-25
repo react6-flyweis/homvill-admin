@@ -103,10 +103,6 @@ export default function UsersQueryPage() {
     },
   ];
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
   if (isError) {
     return <div>Failed to load user queries.</div>;
   }
@@ -126,6 +122,7 @@ export default function UsersQueryPage() {
       <DataTable
         columns={columns}
         data={rows}
+        loading={isLoading}
         pageSize={7}
         rowClassName={(row) =>
           row.original?.resolved ? "opacity-60 bg-gray-50" : ""
