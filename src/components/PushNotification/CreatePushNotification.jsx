@@ -2,7 +2,12 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+
+import { useCreatePush } from "@/mutations/pushNotification";
 import { PageLayout } from "../layouts/PageLayout";
+import { RootFormErrors } from "../RootFormErrors";
 
 import {
   Form,
@@ -24,6 +29,7 @@ import {
   SelectItem,
 } from "../ui/select";
 import { MediaSelector } from "./MediaSelector";
+import { LoadingButton } from "@/components/ui/loading-button";
 
 const pushSchema = z.object({
   title: z.string().min(1, "Title is required").max(200),
@@ -51,11 +57,34 @@ export default function CreatePush() {
     },
   });
 
-  const onSubmit = (values) => {
-    // Mock submit - replace with real API call
-    console.log("Submit push notification:", values);
-    window.alert("Push notification created (mock)");
-    form.reset();
+  const navigate = useNavigate();
+  const createMut = useCreatePush();
+
+  const onSubmit = async (values) => {
+    // map form values to API payload
+    const payload = {
+      title: values.title,
+      content: values.content,
+      whomtosend: values.whom === "all" ? "all" : "single",
+      repeat_notification: values.repeat === "yes",
+    };
+
+    // attach media_file if media selected (MediaSelector returns { id, name, src })
+    if (values.media && values.media.src) {
+      payload.media_file = values.media.src;
+    }
+
+    try {
+      await createMut.mutateAsync(payload);
+      toast.success("Push notification created");
+      setTimeout(() => {
+        navigate("/dashboard/push");
+      }, 1500);
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message || err?.message || "Something went wrong";
+      form.setError("root", { type: "manual", message: msg });
+    }
   };
 
   return (
@@ -253,12 +282,17 @@ export default function CreatePush() {
             </div>
 
             <div className="pt-4 flex justify-center">
-              <Button className="w-40 rounded " type="submit">
-                Add
-              </Button>
+              <LoadingButton
+                className="w-40 rounded "
+                type="submit"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting ? "Creating..." : "Add"}
+              </LoadingButton>
             </div>
           </form>
         </Form>
+        <RootFormErrors errors={form.formState.errors.root} />
       </div>
     </PageLayout>
   );
