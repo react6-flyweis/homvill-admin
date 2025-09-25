@@ -2,8 +2,6 @@ import React from "react";
 import totalUsersImg from "@/assets/group3.svg"; // Replace with your left image
 import listedStatesImg from "@/assets/frame.svg"; // Replace with your right image
 
-import { FaUser, FaHome, FaLayerGroup } from "react-icons/fa";
-import { BsGraphUp } from "react-icons/bs";
 import { FiTrash2 } from "react-icons/fi";
 import {
   BarChart,

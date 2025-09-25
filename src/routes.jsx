@@ -1,7 +1,7 @@
 import { lazy } from "react";
 import { Navigate } from "react-router-dom";
 
-const Overview = lazy(() => import("./components/Overview"));
+const Overview = lazy(() => import("./pages/Overview/Overview"));
 const UsersPage = lazy(() => import("./pages/Users/Users"));
 const AuditLogs = lazy(() => import("./components/AuditLogs"));
 const SubAdmin = lazy(() => import("./pages/SubAdmin/SubAdmin"));
