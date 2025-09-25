@@ -20,3 +20,22 @@ export function useCreatePromoCode(options = {}) {
     },
   });
 }
+
+export function useUpdatePromoCode(options = {}) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, payload }) => {
+      const body = { id: Number(id), ...payload };
+      const { data } = await api.put(`/api/promo-code/update`, body);
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["promoCodes"]);
+      if (options.onSuccess) options.onSuccess(data);
+    },
+    onError: (err) => {
+      if (options.onError) options.onError(err);
+    },
+  });
+}
