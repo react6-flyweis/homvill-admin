@@ -6,7 +6,6 @@ import {
   DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,8 +19,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useCreateTerms, useUpdateTerms } from "@/mutations/terms";
+import { RootFormErrors } from "@/components/RootFormErrors";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { toast } from "sonner";
 
-export function TermDialog({ open, onOpenChange, onSubmit, initialValues }) {
+export function TermDialog({ open, onOpenChange, initialValues }) {
   const TermSchema = z.object({
     title: z.string().min(1, "Title is required"),
     description: z.string().min(1, "Description is required"),
@@ -34,6 +37,9 @@ export function TermDialog({ open, onOpenChange, onSubmit, initialValues }) {
       description: "",
     },
   });
+
+  const createMut = useCreateTerms();
+  const updateMut = useUpdateTerms();
 
   // when initialValues or open changes (e.g. editing an existing term or opening/closing), set or clear form values
   React.useEffect(() => {
@@ -51,17 +57,36 @@ export function TermDialog({ open, onOpenChange, onSubmit, initialValues }) {
     }
   }, [initialValues, open]);
 
-  const handle = (values) => {
-    if (onSubmit) onSubmit(values);
-    // close dialog and reset form
-    onOpenChange(false);
-    form.reset();
+  const handle = async (values) => {
+    try {
+      if (initialValues) {
+        // update
+        await updateMut.mutateAsync({
+          id: initialValues.id,
+          terms_Condition_Title: values.title,
+          Description: values.description,
+          Status: initialValues.Status ?? true,
+        });
+        toast.success("Terms & Condition updated successfully");
+      } else {
+        await createMut.mutateAsync({
+          terms_Condition_Title: values.title,
+          Description: values.description,
+        });
+        toast.success("Terms & Condition created successfully");
+      }
+      onOpenChange(false);
+    } catch (err) {
+      // try to extract message
+      const msg =
+        err?.response?.data?.message || err?.message || "Something went wrong";
+      form.setError("root", { type: "manual", message: msg });
+    }
   };
 
   // when dialog is closed externally, clear errors and reset
   const handleOpenChange = (val) => {
     if (!val) {
-      form.clearErrors();
       form.reset();
     }
     if (onOpenChange) onOpenChange(val);
@@ -115,14 +140,19 @@ export function TermDialog({ open, onOpenChange, onSubmit, initialValues }) {
 
               <DialogFooter>
                 <div className="w-full flex items-center justify-center">
-                  <Button type="submit" className="w-32 rounded">
+                  <LoadingButton
+                    type="submit"
+                    className="w-32 rounded"
+                    isLoading={form.formState.isSubmitting}
+                  >
                     {initialValues ? "Update" : "Add"}
-                  </Button>
+                  </LoadingButton>
                 </div>
               </DialogFooter>
             </form>
           </Form>
         </div>
+        <RootFormErrors errors={form.formState.errors.root} />
       </DialogContent>
     </Dialog>
   );
