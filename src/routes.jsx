@@ -111,7 +111,7 @@ export const routes = [
   { path: "userquery", element: <UserQuery /> },
   { path: "promocode", element: <PromoCode /> },
   { path: "promocode/createpromo", element: <CreatePromo /> },
-  { path: "promocode/editcode", element: <EditCode /> },
+  { path: "promocode/editcode/:id", element: <EditCode /> },
   { path: "review", element: <Review /> },
   { path: "terms", element: <Terms /> },
   { path: "privacy", element: <Privacy /> },

@@ -1,15 +1,92 @@
-import React, { useState } from "react";
+import React, { useMemo } from "react";
 import { ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { PromoForm } from "./PromoForm";
+import { useGetPromoById } from "@/queries/promoCodes";
+import { useUpdatePromoCode } from "@/mutations/promoCode";
+import extractApiError from "@/lib/errorHandler";
 
-const CreatePromoCode = () => {
-  const [visibility, setVisibility] = useState(true);
-  const [discountType, setDiscountType] = useState("flat");
+const EditPromoCode = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+
+  const { data, isLoading } = useGetPromoById(id);
+  const updatePromo = useUpdatePromoCode();
+
+  const defaults = useMemo(() => {
+    // map API response shape to form fields, defensively
+    const item = data?.data || {};
+    return {
+      offerName: item.offer_name || item.OfferName || "",
+      couponCode: item.Coupon_code || item.coupon_code || "",
+      couponType:
+        item.Coupon_type && item.Coupon_type.toLowerCase().includes("private")
+          ? "private"
+          : "public",
+      timesUsed: item.Coupon_count_used ?? item.timesUsed ?? undefined,
+      usePerUser: item.use_Per_user ?? item.usePerUser ?? undefined,
+      // Select_area_id can be an id or an object { Area_id, Area_name }
+      area: item.Select_area_id
+        ? typeof item.Select_area_id === "object"
+          ? String(item.Select_area_id.Area_id ?? "none")
+          : String(item.Select_area_id)
+        : "none",
+      visibility: item.visibility ?? true,
+      discountType:
+        item.Diescount_type &&
+        item.Diescount_type.toLowerCase().includes("percentage")
+          ? "percentage"
+          : "flat",
+      amount: item.Discount_amount ?? item.amount ?? undefined,
+      // Normalize ISO datetimes to YYYY-MM-DD for date inputs and keep times
+      startDate:
+        item.StartDate && typeof item.StartDate === "string"
+          ? item.StartDate.split("T")[0]
+          : item.StartDate ?? "",
+      startTime: item.StartTime ?? "",
+      endDate:
+        item.EndDate && typeof item.EndDate === "string"
+          ? item.EndDate.split("T")[0]
+          : item.EndDate ?? "",
+      endTime: item.EndTime ?? "",
+    };
+  }, [data]);
+
+  const onSubmit = async (values, form) => {
+    const payload = {
+      offer_name: values.offerName,
+      Coupon_code: values.couponCode,
+      Coupon_type:
+        values.couponType === "public" ? "Public Coupon" : "Private Coupon",
+      Coupon_count_used: values.timesUsed || 0,
+      use_Per_user: values.usePerUser || 0,
+      Select_area_id: values.area && values.area !== "none" ? values.area : 1,
+      visibility: !!values.visibility,
+      Diescount_type:
+        values.discountType === "flat"
+          ? "Flat Discount"
+          : "Percentage Discount",
+      Discount_amount: values.amount || 0,
+      StartDate: values.startDate || undefined,
+      StartTime: values.startTime || undefined,
+      EndDate: values.endDate || undefined,
+      EndTime: values.endTime || undefined,
+    };
+
+    try {
+      await updatePromo.mutateAsync({ id, payload });
+      toast.success("Promo code updated successfully");
+      setTimeout(() => {
+        navigate("/dashboard/promocode");
+      }, 1000);
+    } catch (error) {
+      const message = extractApiError(error);
+      form.setError("root", { type: "manual", message });
+    }
+  };
 
   return (
     <div>
-      {/* Header */}
       <div className="flex items-center gap-2 mb-6">
         <ArrowLeft
           onClick={() => navigate("/dashboard/promocode")}
@@ -18,181 +95,21 @@ const CreatePromoCode = () => {
         />
         <h1 className="text-lg font-semibold">Edit Promo Code</h1>
       </div>
+
       <p className="text-sm text-gray-500 mb-6">
-        Learn ipsum is simply dummy text of the printing and typesetting
-        industry.
+        Edit the promo code details below.
       </p>
 
-      {/* Form */}
-      <div className="grid bg-white shadow rounded-md p-3 grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Offer Name */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Offer Name</label>
-          <input
-            type="text"
-            defaultValue="New Year Sale"
-            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none"
-          />
-        </div>
-
-        {/* Coupon Code */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Coupon Code</label>
-          <input
-            type="text"
-            defaultValue="NY2025"
-            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none"
-          />
-        </div>
-
-        {/* Coupon Type */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Coupon Type</label>
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 text-sm">
-              <input type="radio" name="type" defaultChecked /> Public Coupon
-            </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input type="radio" name="type" /> Private Coupon
-            </label>
-          </div>
-        </div>
-        <br />
-        {/* Number of times used */}
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Number of time code has been used
-          </label>
-          <input
-            type="number"
-            defaultValue={10}
-            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none"
-          />
-        </div>
-
-        {/* Use per user */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Use per user</label>
-          <input
-            type="number"
-            defaultValue={2}
-            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none"
-          />
-        </div>
-
-        {/* Select Area */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Select Area</label>
-          <select
-            defaultValue="Area 1"
-            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none"
-          >
-            <option>Select any</option>
-            <option>Area 1</option>
-            <option>Area 2</option>
-          </select>
-        </div>
-        <br />
-        {/* Visibility Toggle */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Visibility</label>
-          <div className="flex items-center gap-4">
-            <span className="text-xs text-gray-500">
-              Toggle OFF, in case you don’t want to show this coupon to your
-              users.
-            </span>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={visibility}
-                onChange={() => setVisibility(!visibility)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:bg-blue-600"></div>
-              <span className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition peer-checked:translate-x-5"></span>
-            </label>
-          </div>
-        </div>
-        <br />
-        {/* Discount Type */}
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Discount Type
-          </label>
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="radio"
-                checked={discountType === "flat"}
-                onChange={() => setDiscountType("flat")}
-              />{" "}
-              Flat Discount
-            </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="radio"
-                checked={discountType === "percentage"}
-                onChange={() => setDiscountType("percentage")}
-              />{" "}
-              Percentage Discount
-            </label>
-          </div>
-          <input
-            type="text"
-            defaultValue="500"
-            className="mt-2 w-full border rounded-md px-3 py-2 text-sm focus:outline-none"
-          />
-        </div>
-        <br />
-        {/* Start Date */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Start Date</label>
-          <input
-            type="date"
-            defaultValue="2025-08-28"
-            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none"
-          />
-        </div>
-
-        {/* Start Time */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Start Time</label>
-          <input
-            type="time"
-            defaultValue="10:00"
-            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none"
-          />
-        </div>
-
-        {/* End Date */}
-        <div>
-          <label className="block text-sm font-medium mb-1">End Date</label>
-          <input
-            type="date"
-            defaultValue="2025-09-15"
-            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none"
-          />
-        </div>
-
-        {/* End Time */}
-        <div>
-          <label className="block text-sm font-medium mb-1">End Time</label>
-          <input
-            type="time"
-            defaultValue="18:00"
-            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none"
-          />
-        </div>
-
-        {/* Add Button */}
-        <div className="mt-6 items-center flex justify-center md:col-span-2">
-          <button className="bg-[#8A1538] text-white px-6 py-2 rounded-md text-sm font-medium">
-            Add
-          </button>
-        </div>
+      <div>
+        <PromoForm
+          defaultValues={defaults}
+          onSubmit={onSubmit}
+          isLoading={updatePromo.isLoading || isLoading}
+          submitLabel="Update"
+        />
       </div>
     </div>
   );
 };
 
-export default CreatePromoCode;
+export default EditPromoCode;
