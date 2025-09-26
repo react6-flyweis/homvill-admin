@@ -7,16 +7,21 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
+import {
+  useDeletePromoCode,
+  useExtendPromoExpiry,
+} from "@/mutations/promoCode";
+import { toast } from "sonner";
 
 // Inline small delete dialog used only by PromoExpiredDialog
-function InnerDeleteDialog({ open, onOpenChange, onConfirm }) {
+function InnerDeleteDialog({ open, onOpenChange, onConfirm, loading }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm rounded" showCloseButton={false}>
         <DialogHeader>
           <div className="flex items-start justify-between w-full">
-            <DialogTitle className="text-2xl font-semibold text-[#8A1538]">
+            <DialogTitle className="text-2xl font-semibold text-primary">
               Promo Code Expired...!!!
             </DialogTitle>
           </div>
@@ -29,16 +34,17 @@ function InnerDeleteDialog({ open, onOpenChange, onConfirm }) {
         </div>
 
         <DialogFooter className="mt-4 flex gap-4 sm:justify-center">
-          <Button
+          <LoadingButton
             variant="destructive"
             className="bg-red-600 hover:bg-red-700 w-36 rounded"
             onClick={() => {
               onConfirm && onConfirm();
-              onOpenChange(false);
+              // Don't close dialog optimistically - let parent handle closing on success
             }}
+            isLoading={loading}
           >
-            <span>Delete Forever</span>
-          </Button>
+            Delete Forever
+          </LoadingButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -46,7 +52,7 @@ function InnerDeleteDialog({ open, onOpenChange, onConfirm }) {
 }
 
 // Inline small extend dialog used only by PromoExpiredDialog
-function InnerExtendDialog({ open, onOpenChange, onExtend }) {
+function InnerExtendDialog({ open, onOpenChange, onExtend, loading }) {
   const [selectedDate, setSelectedDate] = useState("");
 
   return (
@@ -74,28 +80,85 @@ function InnerExtendDialog({ open, onOpenChange, onExtend }) {
         </div>
 
         <DialogFooter className="mt-4">
-          <Button
+          <LoadingButton
             className="bg-[#8A1538] text-white rounded w-full"
             onClick={() => {
               if (selectedDate) {
                 onExtend && onExtend(selectedDate);
-                onOpenChange(false);
+                // Don't close dialog optimistically - let parent handle closing on success
               }
             }}
             disabled={!selectedDate}
+            isLoading={loading}
           >
             Extend
-          </Button>
+          </LoadingButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-export function PromoExpiredDialog({ open, onOpenChange, onExtend, onDelete }) {
+export function PromoExpiredDialog({
+  open,
+  onOpenChange,
+  onExtend,
+  onDelete,
+  promoId,
+}) {
   // internal nested dialog states
   const [showDelete, setShowDelete] = useState(false);
   const [showExtend, setShowExtend] = useState(false);
+
+  // mutations
+  const deleteMutation = useDeletePromoCode();
+  const extendMutation = useExtendPromoExpiry();
+
+  const handleDelete = async () => {
+    if (!promoId) return;
+
+    try {
+      await deleteMutation.mutateAsync(promoId);
+      toast.success("Promo code deleted successfully");
+      // close nested delete dialog first
+      setShowDelete(false);
+      // close all dialogs and notify parent
+      onDelete && onDelete();
+      onOpenChange(false);
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to delete promo code";
+      toast.error(errorMessage);
+      console.error("Delete promo code error:", error);
+    }
+  };
+
+  const handleExtend = async (date) => {
+    if (!promoId || !date) return;
+
+    try {
+      // API expects newEndDate and newEndTime (time provided separately)
+      await extendMutation.mutateAsync({
+        id: promoId,
+        newEndDate: date,
+        newEndTime: "00:00",
+      });
+      toast.success("Promo code extended successfully");
+      // close nested extend dialog first
+      setShowExtend(false);
+      onExtend && onExtend();
+      onOpenChange(false);
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to extend promo code";
+      toast.error(errorMessage);
+      console.error("Extend promo code error:", error);
+    }
+  };
 
   return (
     <>
@@ -117,25 +180,27 @@ export function PromoExpiredDialog({ open, onOpenChange, onExtend, onDelete }) {
           </div>
 
           <DialogFooter className="mt-4 flex gap-4 sm:justify-center">
-            <Button
+            <LoadingButton
               variant="destructive"
               className="bg-red-600 hover:bg-red-700 w-36 rounded"
               onClick={() => {
                 // open nested delete dialog
                 setShowDelete(true);
               }}
+              isLoading={deleteMutation.isPending}
             >
-              <span>No</span>
-            </Button>
-            <Button
+              No
+            </LoadingButton>
+            <LoadingButton
               className="bg-green-600 hover:bg-green-700 w-36 rounded"
               onClick={() => {
                 // open nested extend dialog
                 setShowExtend(true);
               }}
+              isLoading={extendMutation.isPending}
             >
-              <span>Yes</span>
-            </Button>
+              Yes
+            </LoadingButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -144,18 +209,15 @@ export function PromoExpiredDialog({ open, onOpenChange, onExtend, onDelete }) {
       <InnerDeleteDialog
         open={showDelete}
         onOpenChange={(v) => setShowDelete(!!v)}
-        onConfirm={() => {
-          onDelete && onDelete();
-          // keep parent closed by caller if needed
-        }}
+        onConfirm={handleDelete}
+        loading={deleteMutation.isPending}
       />
 
       <InnerExtendDialog
         open={showExtend}
         onOpenChange={(v) => setShowExtend(!!v)}
-        onExtend={(date) => {
-          onExtend && onExtend(date);
-        }}
+        onExtend={handleExtend}
+        loading={extendMutation.isPending}
       />
     </>
   );
