@@ -39,3 +39,23 @@ export function useUpdatePromoCode(options = {}) {
     },
   });
 }
+
+// Mutation hook to delete a promo code by id
+export function useDeletePromoCode(options = {}) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id) => {
+      // Ensure id is numeric when API expects a numeric id
+      const { data } = await api.delete(`/api/promo-code/delete/${id}`);
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["promoCodes"]);
+      if (options.onSuccess) options.onSuccess(data);
+    },
+    onError: (err) => {
+      if (options.onError) options.onError(err);
+    },
+  });
+}
