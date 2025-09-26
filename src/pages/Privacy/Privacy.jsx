@@ -5,6 +5,9 @@ import { PrivacyDialog } from "@/components/Privacy/PrivacyDialog";
 import { PrivacyViewDialog } from "@/components/Privacy/PrivacyViewDialog";
 import { Button } from "@/components/ui/button";
 import { useGetAllPrivacy } from "@/queries/privacy";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useDeletePrivacy } from "@/mutations/privacy";
+import { toast } from "sonner";
 
 export default function Privacy() {
   // Fetch privacy items from API
@@ -31,16 +34,8 @@ export default function Privacy() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [viewing, setViewing] = useState(null);
-
-  function handleAddPrivacy(values) {
-    // local optimistic behavior: if editing, we'd normally call API
-    if (editing) {
-      // find and update in-memory copy - since source of truth is API, UI will re-sync on refetch
-      setEditing(null);
-    } else {
-      // new item - in a real app we'd POST to API. For now, show dialog close.
-    }
-  }
+  const [toDelete, setToDelete] = useState(null);
+  const [showDelete, setShowDelete] = useState(false);
 
   function handleEditPrivacy(item) {
     setEditing(item);
@@ -48,8 +43,27 @@ export default function Privacy() {
   }
 
   function handleDeletePrivacy(id) {
-    // For now, just log. Ideally this calls DELETE endpoint and invalidates query.
-    console.log("Delete privacy id:", id);
+    // open confirm dialog and store id to delete
+    setToDelete(id);
+    setShowDelete(true);
+  }
+
+  const deleteMut = useDeletePrivacy();
+
+  async function handleDelete(id) {
+    try {
+      await deleteMut.mutateAsync(id);
+      toast.success("Privacy policy deleted successfully");
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Failed to delete privacy policy";
+      toast.error(msg);
+    } finally {
+      setToDelete(null);
+      setShowDelete(false);
+    }
   }
 
   return (
@@ -60,7 +74,6 @@ export default function Privacy() {
           setOpen(val);
           if (!val) setEditing(null);
         }}
-        onSubmit={handleAddPrivacy}
         initialValues={editing}
       />
 
@@ -113,6 +126,16 @@ export default function Privacy() {
           if (!v) setViewing(null);
         }}
         data={viewing}
+      />
+      <ConfirmDialog
+        open={showDelete}
+        onOpenChange={setShowDelete}
+        title={"Delete Privacy & Policy"}
+        description={
+          "Are you sure you want to delete this privacy policy? This action cannot be undone."
+        }
+        onConfirm={toDelete ? () => handleDelete(toDelete) : null}
+        onCancel={() => setShowDelete(false)}
       />
     </div>
   );
