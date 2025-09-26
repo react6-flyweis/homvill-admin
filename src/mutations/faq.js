@@ -20,3 +20,22 @@ export function useCreateFAQ(options = {}) {
     },
   });
 }
+
+export function useUpdateFAQ(options = {}) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, payload }) => {
+      const body = { id: Number(id), ...payload };
+      const { data } = await api.put(`/api/faq/update`, body);
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["faq"]);
+      if (options.onSuccess) options.onSuccess(data);
+    },
+    onError: (err) => {
+      if (options.onError) options.onError(err);
+    },
+  });
+}
