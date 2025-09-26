@@ -39,3 +39,22 @@ export function useUpdateFAQ(options = {}) {
     },
   });
 }
+
+export function useDeleteFAQ(options = {}) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id) => {
+      // API expects id in the URL param
+      const { data } = await api.delete(`/api/faq/delete/${id}`);
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["faq"]);
+      if (options.onSuccess) options.onSuccess(data);
+    },
+    onError: (err) => {
+      if (options.onError) options.onError(err);
+    },
+  });
+}
