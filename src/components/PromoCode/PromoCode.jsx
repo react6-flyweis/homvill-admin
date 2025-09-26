@@ -22,20 +22,19 @@ const PromoCodeTable = () => {
         it.id ||
         Math.random().toString(36).slice(2),
       // API may use `StartDate` / `EndDate` (ISO strings) or `startDate`/`endDate`
-      startDate:
-        it.StartDate || it.startDate
-          ? new Date(it.StartDate || it.startDate).toLocaleDateString()
-          : "-",
-      endDate:
-        it.EndDate || it.endDate
-          ? new Date(it.EndDate || it.endDate).toLocaleDateString()
-          : "-",
-      // Offer name: prefer `offer_name`, then coupon code, then generic fields
-      offerName:
-        it.offer_name || it.offerName || it.Coupon_code || it.code || "-",
-      // Discount type: API sample uses `Diescount_type` (typo) or `Coupon_type`
-      discountType:
-        it.Diescount_type || it.discountType || it.Coupon_type || "-",
+      startDate: (() => {
+        const val = it.StartDate || it.startDate || it.CreateAt;
+        return val ? new Date(val).toLocaleDateString() : "-";
+      })(),
+      endDate: (() => {
+        const val = it.EndDate || it.endDate || it.expiry_info?.end_date;
+        return val ? new Date(val).toLocaleDateString() : "-";
+      })(),
+      // Offer & coupon
+      offerName: it.offer_name || "-",
+      couponCode: it.Coupon_code || "-",
+
+      discountType: it.Diescount_type || "-",
       raw: it,
     }));
   }, [data]);
@@ -82,6 +81,7 @@ const PromoCodeTable = () => {
 
         {openDialogId && (
           <PromoExpiredDialog
+            promoId={openDialogId}
             open={!!openDialogId}
             onOpenChange={(v) => {
               if (!v) handleCloseDialog();
