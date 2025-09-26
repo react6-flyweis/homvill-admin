@@ -59,3 +59,23 @@ export function useDeletePromoCode(options = {}) {
     },
   });
 }
+
+// Mutation hook to extend promo expiry
+export function useExtendPromoExpiry(options = {}) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, newEndDate, newEndTime }) => {
+      const payload = { id: Number(id), newEndDate, newEndTime };
+      const { data } = await api.put(`/api/promo-code/extend-expiry`, payload);
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["promoCodes"]);
+      if (options.onSuccess) options.onSuccess(data);
+    },
+    onError: (err) => {
+      if (options.onError) options.onError(err);
+    },
+  });
+}
