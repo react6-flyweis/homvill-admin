@@ -44,3 +44,22 @@ export function useUpdateTerms(options = {}) {
     ...options,
   });
 }
+
+export function useDeleteTerms(options = {}) {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id) => {
+      const { data } = await api.delete(`/api/terms-condition/delete/${id}`);
+      return data;
+    },
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ["terms"] });
+      if (options.onSuccess) options.onSuccess(res);
+    },
+    onError: (err) => {
+      if (options.onError) options.onError(err);
+    },
+    ...options,
+  });
+}
