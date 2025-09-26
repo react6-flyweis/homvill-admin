@@ -42,3 +42,22 @@ export function useUpdatePrivacy(options = {}) {
     ...options,
   });
 }
+
+export function useDeletePrivacy(options = {}) {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id) => {
+      const { data } = await api.delete(`/api/privacy-policy/delete/${id}`);
+      return data;
+    },
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ["privacy"] });
+      if (options.onSuccess) options.onSuccess(res);
+    },
+    onError: (err) => {
+      if (options.onError) options.onError(err);
+    },
+    ...options,
+  });
+}
