@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/datatable/DataTable";
 import tick from "@/assets/mdi_tick-all.svg";
 import { useGetAllUserQueries } from "@/queries/userQueries";
+import { useUpdateUserQuery } from "@/mutations/userQueries";
 
 // initial placeholder while data loads
 
@@ -42,13 +43,34 @@ export default function UsersQueryPage() {
 
   const handleConfirmRectify = () => {
     if (activeRowIndex == null) return;
+    const row = rows[activeRowIndex];
+    if (!row) return;
+
+    // Optimistically update UI
     setRows((prev) => {
       const copy = [...prev];
       copy[activeRowIndex] = { ...copy[activeRowIndex], resolved: true };
       return copy;
     });
-    setActiveRowIndex(null);
+
+    // call API to persist status
+    updateUserQuery
+      .mutateAsync({ id: row.id || row._id || row.ID, Status: true })
+      .catch((err) => {
+        // revert optimistic change on error
+        setRows((prev) => {
+          const copy = [...prev];
+          copy[activeRowIndex] = { ...copy[activeRowIndex], resolved: false };
+          return copy;
+        });
+        console.error("Failed to update user query status:", err);
+      })
+      .finally(() => {
+        setActiveRowIndex(null);
+      });
   };
+
+  const updateUserQuery = useUpdateUserQuery();
 
   const columns = [
     { accessorKey: "date", header: "DATE" },
