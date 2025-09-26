@@ -1,13 +1,5 @@
 import React from "react";
 import { Input } from "../ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
-import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 
@@ -25,15 +17,9 @@ import {
 } from "../ui/form";
 import { PhotosCollage } from "./PhotosCollage";
 import { AvatarUploader } from "./AvatarUploader";
-
-const categories = [
-  "Furnished Apartments",
-  "Unfurnished Apartments",
-  "Furnished Home",
-  "Unfurnished Home",
-  "Penthouse",
-  "Studio Apartments",
-];
+import { LoadingButton } from "@/components/ui/loading-button";
+import { CategorySelect } from "./CategorySelect";
+import { RootFormErrors } from "@/components/RootFormErrors";
 
 const schema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -42,11 +28,17 @@ const schema = z.object({
   email: z.string().email("Invalid email").optional(),
   category: z.string().min(1, "Select a category"),
   available: z.enum(["RENT", "SALE"]).default("RENT"),
-  // features is a map of featureKey => boolean
-  features: z.record(z.boolean()).optional().default({}),
-  photos: z.array(z.string().nullable()).optional().default([]),
+  // features is a map of featureKey => boolean | undefined (checkboxes can be undefined)
+  features: z.record(z.string(), z.boolean().optional()).optional(),
+  photos: z.array(z.string().nullable()).optional(),
   avatar: z.string().nullable().optional(),
-  propertyCost: z.string().optional(),
+  propertyCost: z
+    .string()
+    .min(1, "Property cost is required")
+    .refine(
+      (val) => !isNaN(Number(val)) && Number(val) > 0,
+      "Property cost must be a positive number"
+    ),
   yearBuild: z.string().optional(),
   plotSize: z.string().optional(),
   finishedSqFt: z.string().optional(),
@@ -57,14 +49,93 @@ const schema = z.object({
   city: z.string().optional(),
   zip: z.string().optional(),
   country: z.string().optional(),
-  whenToSell: z.string().optional(),
-  reasonForSelling: z.string().optional(),
-  listingPrice: z.string().optional(),
-  listingPlotSize: z.string().optional(),
-  listingDescription: z.string().optional(),
+  state: z.string().min(1, "Property state is required"),
+  whenToSell: z.string().min(1, "Property why sell is required"),
+  reasonForSelling: z.string().min(1, "Property reason selling is required"),
+  listingPrice: z
+    .string()
+    .min(1, "Property listing price is required")
+    .refine(
+      (val) => !isNaN(Number(val)) && Number(val) > 0,
+      "Property listing price must be a positive number"
+    ),
+  listingPlotSize: z.string().min(1, "Property listing plot size is required"),
+  listingDescription: z
+    .string()
+    .min(1, "Property listing description is required"),
 });
 
-export function PropertyEditor() {
+const appliances = [
+  "Upgrading my home",
+  "Garbage Disposal",
+  "Refrigerator",
+  "Microwave",
+  "Dryer",
+  "Trash Compactor",
+  "Range Oven",
+  "Washer",
+  "Freezer",
+];
+
+const floors = [
+  "Carpet",
+  "Laminate",
+  "Softwood",
+  "Concrete",
+  "Linoleum-Vinyl",
+  "Tile",
+  "Hardwood",
+  "Slate",
+  "Other",
+];
+
+const others = [
+  "Security Systems",
+  "Patio/Balcony",
+  "Central Heating",
+  "Basement",
+  "Central AC",
+  "Furnished",
+  "Deck",
+  "Fireplace",
+  "Pool",
+  "Porch",
+];
+
+const parking = [
+  "Carport",
+  "Garage attached/Balcony",
+  "Garage Attached",
+  "On street",
+  "Off Street",
+  "None",
+];
+
+const rooms = [
+  "Breakfast Nik",
+  "Master Bath",
+  "Workshop",
+  "Dining Room",
+  "Office",
+  "Sun Room",
+  "Laundry Room",
+  "Pantry",
+  "Walk-in Closet Yard",
+  "Library",
+  "Recreation Room",
+  "Family Room",
+];
+
+const views = ["Mountain", "Territorial", "City", "Park", "Water"];
+
+const slug = (s) =>
+  s
+    .toString()
+    .toLowerCase()
+    .replace(/\s+/g, "_")
+    .replace(/[^a-z0-9_]/g, "");
+
+export function PropertyEditor({ onCreate }) {
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -77,80 +148,15 @@ export function PropertyEditor() {
       features: {},
       photos: [null, null, null, null, null, null, null],
       avatar: null,
+      propertyCost: "",
+      state: "",
+      whenToSell: "",
+      reasonForSelling: "",
+      listingPrice: "",
+      listingPlotSize: "",
+      listingDescription: "",
     },
   });
-
-  // Build default feature keys for the groups used below so we can
-  // initialize form state easily. We'll keep keys safe for object paths.
-  const slug = (s) =>
-    s
-      .toString()
-      .toLowerCase()
-      .replace(/\s+/g, "_")
-      .replace(/[^a-z0-9_]/g, "");
-
-  const appliances = [
-    "Upgrading my home",
-    "Garbage Disposal",
-    "Refrigerator",
-    "Microwave",
-    "Dryer",
-    "Trash Compactor",
-    "Range Oven",
-    "Washer",
-    "Freezer",
-  ];
-
-  const floors = [
-    "Carpet",
-    "Laminate",
-    "Softwood",
-    "Concrete",
-    "Linoleum-Vinyl",
-    "Tile",
-    "Hardwood",
-    "Slate",
-    "Other",
-  ];
-
-  const others = [
-    "Security Systems",
-    "Patio/Balcony",
-    "Central Heating",
-    "Basement",
-    "Central AC",
-    "Furnished",
-    "Deck",
-    "Fireplace",
-    "Pool",
-    "Porch",
-  ];
-
-  const parking = [
-    "Carport",
-    "Garage attached/Balcony",
-    "Garage Attached",
-    "On street",
-    "Off Street",
-    "None",
-  ];
-
-  const rooms = [
-    "Breakfast Nik",
-    "Master Bath",
-    "Workshop",
-    "Dining Room",
-    "Office",
-    "Sun Room",
-    "Laundry Room",
-    "Pantry",
-    "Walk-in Closet Yard",
-    "Library",
-    "Recreation Room",
-    "Family Room",
-  ];
-
-  const views = ["Mountain", "Territorial", "City", "Park", "Water"];
 
   // Initialize features defaults if not present
   React.useEffect(() => {
@@ -166,7 +172,7 @@ export function PropertyEditor() {
     let changed = false;
     allLabels.forEach((label) => {
       const key = slug(label);
-      if (!(key in current)) {
+      if (!(key in current) || current[key] === undefined) {
         current[key] = false;
         changed = true;
       }
@@ -280,6 +286,20 @@ export function PropertyEditor() {
 
               <FormField
                 control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter here" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
@@ -307,18 +327,10 @@ export function PropertyEditor() {
                 <FormItem>
                   <FormLabel>Category</FormLabel>
                   <FormControl>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select Category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map((c) => (
-                          <SelectItem key={c} value={c}>
-                            {c}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <CategorySelect
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -334,20 +346,23 @@ export function PropertyEditor() {
                   control={form.control}
                   name="available"
                   render={({ field }) => (
-                    <RadioGroup
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      className="flex gap-4"
-                    >
-                      <label className="inline-flex items-center gap-2">
-                        <RadioGroupItem value="RENT" />
-                        <span className="text-sm">RENT</span>
-                      </label>
-                      <label className="inline-flex items-center gap-2">
-                        <RadioGroupItem value="SALE" />
-                        <span className="text-sm">SALE</span>
-                      </label>
-                    </RadioGroup>
+                    <>
+                      <RadioGroup
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        className="flex gap-4"
+                      >
+                        <label className="inline-flex items-center gap-2">
+                          <RadioGroupItem value="RENT" />
+                          <span className="text-sm">RENT</span>
+                        </label>
+                        <label className="inline-flex items-center gap-2">
+                          <RadioGroupItem value="SALE" />
+                          <span className="text-sm">SALE</span>
+                        </label>
+                      </RadioGroup>
+                      <FormMessage />
+                    </>
                   )}
                 />
               </div>
@@ -515,6 +530,20 @@ export function PropertyEditor() {
 
             <FormField
               control={form.control}
+              name="state"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>State</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter here" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="whenToSell"
               render={({ field }) => (
                 <FormItem>
@@ -577,11 +606,22 @@ export function PropertyEditor() {
             />
 
             <div className="col-span-2">
-              <FormLabel>Listing Description</FormLabel>
-              <textarea
-                className="min-h-[120px] w-full rounded border border-input bg-transparent px-3 py-2 text-sm"
-                placeholder="Enter here"
-                {...form.register("listingDescription")}
+              <FormField
+                control={form.control}
+                name="listingDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Listing Description</FormLabel>
+                    <FormControl>
+                      <textarea
+                        className="min-h-[120px] w-full rounded border border-input bg-transparent px-3 py-2 text-sm"
+                        placeholder="Enter here"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
 
@@ -759,10 +799,19 @@ export function PropertyEditor() {
             </div>
           </div>
 
+          <RootFormErrors
+            errors={form.formState.errors.root}
+            className="mt-5"
+          />
+
           <div className="mt-6">
-            <Button type="submit" className="w-full bg-[#800020]">
+            <LoadingButton
+              isLoading={form.formState.isSubmitting}
+              type="submit"
+              className="w-full bg-[#800020]"
+            >
               Add
-            </Button>
+            </LoadingButton>
           </div>
         </div>
       </form>
