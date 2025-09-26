@@ -21,6 +21,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { LoadingButton } from "@/components/ui/loading-button";
+import extractApiError from "@/lib/errorHandler";
+import { RootFormErrors } from "@/components/RootFormErrors";
 
 export const UserEditor = ({ onSubmit, initialValues = null }) => {
   const form = useForm({
@@ -65,7 +67,12 @@ export const UserEditor = ({ onSubmit, initialValues = null }) => {
   ];
 
   async function handleSubmit(data) {
-    await onSubmit(data);
+    try {
+      await onSubmit(data);
+    } catch (error) {
+      const message = extractApiError(error);
+      form.setError("root", { message });
+    }
   }
 
   return (
@@ -321,6 +328,8 @@ export const UserEditor = ({ onSubmit, initialValues = null }) => {
                 )}
               />
             </div>
+
+            <RootFormErrors errors={form.formState.errors.root} />
 
             {/* Submit Button */}
             <div>

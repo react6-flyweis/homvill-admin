@@ -46,8 +46,7 @@ const AddUserForm = () => {
       await createUser.mutateAsync(payload);
       setIsOpen(true);
     } catch (err) {
-      const message = extractApiError(err);
-      form.setError("root", { message });
+      throw err;
     }
   };
 
