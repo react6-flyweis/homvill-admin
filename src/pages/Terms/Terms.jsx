@@ -5,6 +5,9 @@ import { TermDialog } from "@/components/Terms/TermDialog";
 import { TermsViewDialog } from "@/components/Terms/TermsViewDialog";
 import { Button } from "@/components/ui/button";
 import { useGetAllTerms } from "@/queries/terms";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useDeleteTerms } from "@/mutations/terms";
+import { toast } from "sonner";
 
 export default function Terms() {
   const { data: apiData = { items: [], count: 0 }, isLoading } =
@@ -29,6 +32,10 @@ export default function Terms() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [viewing, setViewing] = useState(null);
+  const [toDelete, setToDelete] = useState(null);
+  const [showDelete, setShowDelete] = useState(false);
+
+  const deleteMut = useDeleteTerms();
 
   function handleEdit(item) {
     setEditing(item);
@@ -36,7 +43,23 @@ export default function Terms() {
   }
 
   function handleDelete(id) {
-    console.log("Delete term with id:", id);
+    // open confirm dialog and store id to delete
+    setToDelete(id);
+    setShowDelete(true);
+  }
+
+  async function handleConfirmDelete(id) {
+    try {
+      await deleteMut.mutateAsync(id);
+      toast.success("Term deleted successfully");
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message || err?.message || "Failed to delete term";
+      toast.error(msg);
+    } finally {
+      setToDelete(null);
+      setShowDelete(false);
+    }
   }
 
   return (
@@ -100,6 +123,16 @@ export default function Terms() {
           if (!v) setViewing(null);
         }}
         data={viewing}
+      />
+      <ConfirmDialog
+        open={showDelete}
+        onOpenChange={setShowDelete}
+        title={"Delete Term & Condition"}
+        description={
+          "Are you sure you want to delete this term? This action cannot be undone."
+        }
+        onConfirm={toDelete ? () => handleConfirmDelete(toDelete) : null}
+        onCancel={() => setShowDelete(false)}
       />
     </div>
   );
