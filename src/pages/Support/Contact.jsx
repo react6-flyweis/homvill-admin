@@ -1,40 +1,40 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { EyeIcon, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/datatable/DataTable";
 import { UserQueryDialog } from "@/components/UsersQuery/UserQueryDialog";
 import { PageLayout } from "@/components/layouts/PageLayout";
-
-const initialData = Array.from({ length: 13 }).map((_, i) => ({
-  date: "12/05/2024",
-  user: [
-    "Alena George",
-    "Carter Franci",
-    "Jordyn Culhane",
-    "Chance Rosser",
-    "Lincoln Bothman",
-    "Marcus Philips",
-    "Maren Westervelt",
-    "Kadin Lipshutz",
-    "Davis Donin",
-    "Hanna Rosser",
-    "Emery Siphron",
-    "James Torff",
-  ][i % 12],
-  business: "Restaurant",
-  mail: "example@gmail.com",
-  contact: "+1 234 567 890",
-  query: "Lorem Ipsum is Simply Dummy Text Of The Printing Industry",
-}));
+import { useGetAllUserQueries } from "@/queries/userQueries";
 
 export default function ContactUsPage() {
-  const [rows, setRows] = useState(
-    initialData.map((d) => ({ ...d, id: Math.random().toString(36).slice(2) }))
-  );
+  const { data: apiData, isLoading, isError } = useGetAllUserQueries();
+
+  const [rows, setRows] = useState([]);
   const [viewOpen, setViewOpen] = useState(false);
   const [activeRow, setActiveRow] = useState(null);
 
+  useEffect(() => {
+    if (!apiData) return;
+
+    const items = apiData.items || [];
+    const mapped = items.map((it) => {
+      const date = it.CreateAt
+        ? new Date(it.CreateAt).toLocaleDateString()
+        : "";
+      const user = it.user_name || (it.user_id && it.user_id.Name) || "";
+      const business = it.business || "";
+      const mail = it.user_email || (it.user_id && it.user_id.email) || "";
+      const contact = it.user_contact || "";
+      const query = it.Query_txt || "";
+
+      return { ...it, date, user, business, mail, contact, query };
+    });
+
+    setRows(mapped);
+  }, [apiData]);
+
   const handleDelete = (index) => {
+    // keep delete as a local UI-only action (no API call)
     setRows((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -80,12 +80,16 @@ export default function ContactUsPage() {
     },
   ];
 
+  if (isError) {
+    return <div>Failed to load user queries.</div>;
+  }
+
   return (
     <PageLayout
       title="Contact Us"
       description="Lorem Ipsum is simply dummy text of the and typesetting industry."
     >
-      <DataTable columns={columns} data={rows} />
+      <DataTable columns={columns} data={rows} loading={isLoading} />
 
       <UserQueryDialog
         open={viewOpen}
