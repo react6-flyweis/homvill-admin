@@ -19,12 +19,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { PasswordInput } from "@/components/ui/password-input";
+import { toast } from "sonner";
+import extractApiError from "@/lib/errorHandler";
+import { useChangePassword } from "@/mutations/user";
+import { LoadingButton } from "@/components/ui/loading-button";
 
 // password rules: 8-20 chars, at least 1 uppercase, 1 lowercase, 1 number, 1 special char
 const passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=[\]{};':"\\|,.<>/?~`])[A-Za-z\d!@#$%^&*()_\-+=[\]{};':"\\|,.<>/?~`]{8,20}$/;
 
-export function ChangePasswordDialog({ open, onOpenChange }) {
+export function ChangePasswordDialog({ open, onOpenChange, currentPassword }) {
   const schema = z
     .object({
       password: z
@@ -54,15 +58,25 @@ export function ChangePasswordDialog({ open, onOpenChange }) {
     }
   }, [open]);
 
-  const onSubmit = async (newPassword) => {
+  const onSubmit = async (values) => {
+    console.log(currentPassword);
     try {
-      // TODO: wire up to real change-password mutation
+      // call change password mutation
+      await mutateAsync({
+        currentPassword: currentPassword || values.currentPassword || "",
+        newPassword: values.password,
+        confirmPassword: values.confirmPassword,
+      });
       toast.success("Password changed successfully");
       if (onOpenChange) onOpenChange(false);
     } catch (err) {
-      toast.error("Failed to change password");
+      const msg = extractApiError(err) || "Failed to change password";
+      toast.error(msg);
+      form.setError("root", { type: "manual", message: msg });
     }
   };
+
+  const { mutateAsync, isLoading } = useChangePassword();
 
   const handleOpenChange = (val) => {
     if (!val) {
@@ -136,9 +150,13 @@ export function ChangePasswordDialog({ open, onOpenChange }) {
 
               <DialogFooter>
                 <div className="w-full flex items-center justify-center">
-                  <Button type="submit" className="w-32 rounded">
-                    Next
-                  </Button>
+                  <LoadingButton
+                    isLoading={form.formState.isSubmitting}
+                    type="submit"
+                    className="w-32 rounded"
+                  >
+                    Change
+                  </LoadingButton>
                 </div>
               </DialogFooter>
             </form>
