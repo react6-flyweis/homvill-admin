@@ -71,3 +71,24 @@ export function useUpdateUser(options = {}) {
     ...options,
   });
 }
+
+// Change password API
+const CHANGE_PASSWORD = "/api/user/change-password";
+
+async function changePassword(payload) {
+  const { data } = await api.put(CHANGE_PASSWORD, payload);
+  return data;
+}
+
+export function useChangePassword(options = {}) {
+  return useMutation({
+    mutationFn: changePassword,
+    onSuccess: (res) => {
+      if (options.onSuccess) options.onSuccess(res);
+    },
+    onError: (err) => {
+      if (options.onError) options.onError(err);
+    },
+    ...options,
+  });
+}
