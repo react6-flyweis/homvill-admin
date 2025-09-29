@@ -1,4 +1,5 @@
 import React from "react";
+import { formatTimeWithoutSeconds } from "@/lib/utils";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,10 +23,17 @@ export const ChatItem = ({ chat, idx, selected, onClick, onMenuClick }) => {
       <div className="max-w-full overflow-hidden flex items-center gap-3">
         <div className="relative">
           <Avatar>
-            {chat.avatar ? (
+            {chat.otherAvatar ? (
+              <AvatarImage
+                src={chat.otherAvatar}
+                alt={chat.otherName || chat.name}
+              />
+            ) : chat.avatar ? (
               <AvatarImage src={chat.avatar} alt={chat.name} />
             ) : (
-              <AvatarFallback>{chat.name?.charAt(0)}</AvatarFallback>
+              <AvatarFallback>
+                {(chat.otherName || chat.name)?.charAt(0)}
+              </AvatarFallback>
             )}
           </Avatar>
           {/* status dot bottom-left */}
@@ -38,7 +46,9 @@ export const ChatItem = ({ chat, idx, selected, onClick, onMenuClick }) => {
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="font-medium text-sm truncate">{chat.name}</p>
+          <p className="font-medium text-sm truncate">
+            {chat.otherName || chat.name}
+          </p>
           <p className="text-xs text-gray-500 truncate">
             {chat.phone || chat.subtitle || chat.lastMessage}
           </p>
@@ -50,9 +60,11 @@ export const ChatItem = ({ chat, idx, selected, onClick, onMenuClick }) => {
         <div className="mr-2">
           <div className="text-xs text-gray-400">
             ID:{" "}
-            <span className="text-gray-600">{chat.refId || `#${chat.id}`}</span>
+            {/* <span className="text-gray-600">{chat.refId || `#${chat.id}`}</span> */}
           </div>
-          <div className="text-sm font-medium text-gray-700">{chat.time}</div>
+          <div className="text-xs font-medium text-gray-700">
+            {formatTimeWithoutSeconds(chat.time)}
+          </div>
         </div>
 
         {/* play icon (triangle) */}
