@@ -5,6 +5,8 @@ import { useAuthStore } from "@/store/authStore";
 const GET_USER_BY_ID = (id) => `/api/user/getbyid/${id}`;
 const GET_ALL_USERS = () => `/api/user/getall`;
 const GET_USER_BY_AUTH = () => `/api/user/getbyauth`;
+const GET_USERS_BY_ROLE = (roleId, status) =>
+  `/api/user/getbyrole/${roleId}${status ? `?status=${status}` : ""}`;
 
 async function fetchUserById(id) {
   const { data } = await api.get(GET_USER_BY_ID(id));
@@ -18,6 +20,11 @@ async function fetchAllUsers() {
 
 async function fetchUserByAuth() {
   const { data } = await api.get(GET_USER_BY_AUTH());
+  return data;
+}
+
+async function fetchUsersByRole(roleId, status = "") {
+  const { data } = await api.get(GET_USERS_BY_ROLE(roleId, status));
   return data;
 }
 
@@ -65,6 +72,27 @@ export function useGetAllUsers(options = {}) {
     queryKey: ["users"],
     queryFn: () => fetchAllUsers(),
     // return both items and count so callers can show totals
+    select: (data) => ({
+      items: data?.data || [],
+      count:
+        typeof data?.count === "number"
+          ? data.count
+          : data?.data
+          ? data.data.length
+          : 0,
+    }),
+    onError: (err) => {
+      if (options.onError) options.onError(err);
+    },
+    ...options,
+  });
+}
+
+export function useGetUsersByRole(roleId, status = "", options = {}) {
+  return useQuery({
+    queryKey: ["users", "byRole", roleId, status],
+    queryFn: () => fetchUsersByRole(roleId, status),
+    enabled: !!roleId,
     select: (data) => ({
       items: data?.data || [],
       count:
