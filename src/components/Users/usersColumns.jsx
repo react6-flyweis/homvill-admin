@@ -62,8 +62,47 @@ import { EyeIcon, Trash2Icon } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useUpdateUser } from "@/mutations/user";
+import { toast } from "sonner";
+import { extractApiError } from "@/lib/errorHandler";
 
 import verifiedBadge from "@/assets/verified.png";
+
+function UpdateSwitch({ active, id }) {
+  const [checked, setChecked] = useState(active ?? true);
+  const [isSaving, setIsSaving] = useState(false);
+  const mutation = useUpdateUser();
+
+  const handleToggle = async (next) => {
+    const prev = checked;
+    // optimistic UI
+    setChecked(next);
+    setIsSaving(true);
+
+    try {
+      await toast.promise(mutation.mutateAsync({ id, account_active: next }), {
+        loading: "Updating status...",
+        success: "Status updated",
+        error: (err) => extractApiError(err) || "Failed to update status",
+      });
+    } catch (err) {
+      // revert on error
+      setChecked(prev);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <Switch
+      className="data-[state=checked]:bg-green-400 ml-2"
+      onCheckedChange={handleToggle}
+      checked={checked}
+      disabled={isSaving}
+    />
+  );
+}
 
 export const usersColumns = [
   {
@@ -108,9 +147,14 @@ export const usersColumns = [
     id: "actions",
     cell: ({ row }) => {
       // row.original contains the original data object for this row
+      const {
+        id,
+        raw: { account_active },
+      } = row.original;
+
       return (
         <div className="flex items-center justify-end">
-          <Link to={`/dashboard/users/${row.original.id}`}>
+          <Link to={`/dashboard/users/${id}`}>
             <Button variant="ghost" size="icon" title="View">
               <EyeIcon className="text-primary" size={16} />
             </Button>
@@ -118,10 +162,7 @@ export const usersColumns = [
           <Button variant="ghost" size="icon" title="Delete">
             <Trash2Icon className="text-destructive" size={16} />
           </Button>
-          <Switch
-            className="data-[state=checked]:bg-green-400 ml-2"
-            defaultChecked={row.original.active ?? true}
-          />
+          <UpdateSwitch id={id} active={account_active} />
         </div>
       );
     },
