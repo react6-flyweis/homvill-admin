@@ -7,6 +7,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
+const currentYear = new Date().getFullYear();
+
 import {
   Form,
   FormItem,
@@ -32,19 +34,40 @@ const schema = z.object({
   features: z.record(z.string(), z.boolean().optional()).optional(),
   photos: z.array(z.string().nullable()).optional(),
   avatar: z.string().nullable().optional(),
-  propertyCost: z
-    .string()
-    .min(1, "Property cost is required")
-    .refine(
-      (val) => !isNaN(Number(val)) && Number(val) > 0,
-      "Property cost must be a positive number"
-    ),
-  yearBuild: z.string().optional(),
-  plotSize: z.string().optional(),
-  finishedSqFt: z.string().optional(),
-  bedRooms: z.string().optional(),
-  fullBaths: z.string().optional(),
-  halfBaths: z.string().optional(),
+  propertyCost: z.coerce
+    .number({ invalid_type_error: "Property cost is required" })
+    .positive({ message: "Property cost must be a positive number" }),
+  yearBuild: z.coerce
+    .number({ invalid_type_error: "Property year build is required" })
+    .int({ message: "Property year build must be a valid year" })
+    .min(1800, { message: "Property year build must be a valid year" })
+    .max(currentYear + 1, {
+      message: "Property year build must be a valid year",
+    }),
+  plotSize: z.coerce
+    .number({ invalid_type_error: "Property plot size is required" })
+    .nonnegative({ message: "Property plot size is required" }),
+  finishedSqFt: z.coerce
+    .number({ invalid_type_error: "Property finished square feet is required" })
+    .nonnegative({ message: "Property finished square feet is required" }),
+  bedRooms: z.coerce
+    .number({ invalid_type_error: "Property bed rooms is required" })
+    .int({ message: "Property bed rooms must be a non-negative integer" })
+    .nonnegative({
+      message: "Property bed rooms must be a non-negative integer",
+    }),
+  fullBaths: z.coerce
+    .number({ invalid_type_error: "Property full baths is required" })
+    .int({ message: "Property full baths must be a non-negative integer" })
+    .nonnegative({
+      message: "Property full baths must be a non-negative integer",
+    }),
+  halfBaths: z.coerce
+    .number({ invalid_type_error: "Property one/two baths is required" })
+    .int({ message: "Property one/two baths must be a non-negative integer" })
+    .nonnegative({
+      message: "Property one/two baths must be a non-negative integer",
+    }),
   streetAddress: z.string().optional(),
   city: z.string().optional(),
   zip: z.string().optional(),
@@ -149,6 +172,12 @@ export function PropertyEditor({ onCreate }) {
       photos: [null, null, null, null, null, null, null],
       avatar: null,
       propertyCost: "",
+      yearBuild: "",
+      plotSize: "",
+      finishedSqFt: "",
+      bedRooms: "",
+      fullBaths: "",
+      halfBaths: "",
       state: "",
       whenToSell: "",
       reasonForSelling: "",
@@ -184,21 +213,29 @@ export function PropertyEditor({ onCreate }) {
   const onSubmit = async (data) => {
     // Map form data to backend API shape
     const payload = {
-      Properties_Status_id: data.available === "SALE" ? 2 : 1,
+      Properties_Status_id: 4, // Default to 'Available'
+      Properties_for: data.available === "SALE" ? "Sell" : "Rent", // ['Sell', 'Rent', 'Buy']
       Properties_Category_id: 1, // TODO: map category to real id if available
       Owner_Fist_name: data.firstName,
       Owner_Last_name: data.lastName,
       Owner_phone_no: data.phone,
       Owner_email: data.email,
-      Property_cost: data.propertyCost ? Number(data.propertyCost) : undefined,
-      Property_year_build: data.yearBuild ? Number(data.yearBuild) : undefined,
-      Property_Plot_size: data.plotSize,
-      Property_finished_Sq_ft: data.finishedSqFt,
-      Property_Bed_rooms: data.bedRooms ? Number(data.bedRooms) : undefined,
-      Property_Full_Baths: data.fullBaths ? Number(data.fullBaths) : undefined,
-      Property_OneTwo_Baths: data.halfBaths
-        ? Number(data.halfBaths)
-        : undefined,
+      Property_cost:
+        typeof data.propertyCost === "number" ? data.propertyCost : undefined,
+      Property_year_build:
+        typeof data.yearBuild === "number" ? data.yearBuild : undefined,
+      Property_Plot_size:
+        typeof data.plotSize === "number" ? data.plotSize : data.plotSize,
+      Property_finished_Sq_ft:
+        typeof data.finishedSqFt === "number"
+          ? data.finishedSqFt
+          : data.finishedSqFt,
+      Property_Bed_rooms:
+        typeof data.bedRooms === "number" ? data.bedRooms : undefined,
+      Property_Full_Baths:
+        typeof data.fullBaths === "number" ? data.fullBaths : undefined,
+      Property_OneTwo_Baths:
+        typeof data.halfBaths === "number" ? data.halfBaths : undefined,
       Property_Address: data.streetAddress,
       Property_city: data.city,
       Property_zip: data.zip,
@@ -374,7 +411,11 @@ export function PropertyEditor({ onCreate }) {
                   <FormItem>
                     <FormLabel>Property Cost</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter here" {...field} />
+                      <Input
+                        type="number"
+                        placeholder="Enter here"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -388,7 +429,7 @@ export function PropertyEditor({ onCreate }) {
                 <FormItem>
                   <FormLabel>Year Build</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter here" {...field} />
+                    <Input type="number" placeholder="Enter here" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -402,7 +443,7 @@ export function PropertyEditor({ onCreate }) {
                 <FormItem>
                   <FormLabel>Plot Size</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter here" {...field} />
+                    <Input type="number" placeholder="Enter here" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -416,7 +457,7 @@ export function PropertyEditor({ onCreate }) {
                 <FormItem>
                   <FormLabel>Finished Sq. Ft.</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter here" {...field} />
+                    <Input type="number" placeholder="Enter here" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -430,7 +471,7 @@ export function PropertyEditor({ onCreate }) {
                 <FormItem>
                   <FormLabel>Bed Rooms</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter here" {...field} />
+                    <Input type="number" placeholder="Enter here" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -444,7 +485,7 @@ export function PropertyEditor({ onCreate }) {
                 <FormItem>
                   <FormLabel>Full Baths</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter here" {...field} />
+                    <Input type="number" placeholder="Enter here" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -458,7 +499,7 @@ export function PropertyEditor({ onCreate }) {
                 <FormItem>
                   <FormLabel>1/2 Baths</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter here" {...field} />
+                    <Input type="number" placeholder="Enter here" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -507,7 +548,7 @@ export function PropertyEditor({ onCreate }) {
                 <FormItem>
                   <FormLabel>Zip</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter here" {...field} />
+                    <Input type="number" placeholder="Enter here" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
