@@ -8,6 +8,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Phone, MessageCircle, X } from "lucide-react";
 import { CallDialog } from "@/components/UsersQuery/CallDialog";
+import { useNavigate } from "react-router-dom";
+import { createUser, getOrCreateConversation } from "@/lib/chatService";
+import { useAuthStore } from "@/store/authStore";
 
 import { useForm } from "react-hook-form";
 import {
@@ -36,6 +39,45 @@ export function UserQueryDialog({ open, onOpenChange, data }) {
 
   const onSubmit = (values) => {
     console.log(values);
+  };
+
+  const navigate = useNavigate();
+  const authUser = useAuthStore((s) => s.user);
+
+  const handleOpenChat = async () => {
+    try {
+      // upsert both users
+      // current user
+      const currentUserId = authUser?.user_id;
+      await createUser({
+        id: currentUserId,
+        name: authUser?.Name,
+        avatar: authUser?.avatar || "",
+      });
+
+      // target user
+      const targetId = data.user_id.user_id;
+      await createUser({
+        id: targetId,
+        name: data.user_id.Name,
+        avatar: "",
+      });
+
+      const convId = await getOrCreateConversation(currentUserId, targetId);
+
+      // close dialog and navigate to chat page, passing conversation id
+      onOpenChange(false);
+      if (convId) {
+        navigate("/dashboard/chat", { state: { conversationId: convId } });
+      } else {
+        navigate("/dashboard/chat");
+      }
+    } catch (err) {
+      console.error("Failed to create conversation:", err);
+      // still close dialog
+      onOpenChange(false);
+      navigate("/dashboard/chat");
+    }
   };
 
   return (
@@ -121,7 +163,7 @@ export function UserQueryDialog({ open, onOpenChange, data }) {
               <Phone size={16} />
               <span>Call</span>
             </Button>
-            <Button className="rounded">
+            <Button className="rounded" onClick={handleOpenChat}>
               <MessageCircle size={16} />
               <span>Chat</span>
             </Button>
