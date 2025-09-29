@@ -31,3 +31,21 @@ export function photoUrl(seed = "random", width = 400, height = 300) {
   const s = encodeURIComponent(String(seed));
   return `https://picsum.photos/seed/${s}/${width}/${height}`;
 }
+
+/** Format time string by removing seconds. Preserves AM/PM when present. */
+export function formatTimeWithoutSeconds(time) {
+  if (!time) return time;
+  try {
+    const parts = String(time).split(" ");
+    const timePart = parts[0];
+    const rest = parts.slice(1).join(" ");
+    const tSegments = timePart.split(":");
+    if (tSegments.length >= 2) {
+      const hhmm = tSegments.slice(0, 2).join(":");
+      return rest ? `${hhmm} ${rest}` : hhmm;
+    }
+    return time;
+  } catch (e) {
+    return time;
+  }
+}
