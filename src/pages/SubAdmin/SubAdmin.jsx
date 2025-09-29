@@ -2,47 +2,33 @@ import React, { useEffect, useState, useRef } from "react";
 import { SubAdminForm } from "@/components/SubAdmin/SubAdminForm";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
+import { useGetUsersByRole } from "@/queries/user";
 
 const AddSubAdmin = () => {
   const [employees, setEmployees] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const abortRef = useRef(null);
+  // use query hook to fetch sub-admins (role_id = 3)
+  const {
+    data: subAdminsPayload = { items: [], count: 0 },
+    isLoading: loading,
+    isError,
+    error,
+    refetch,
+  } = useGetUsersByRole(3, "active");
 
-  const fetchEmployees = async (signal) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("https://randomuser.me/api/?results=6", {
-        signal,
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      // Map randomuser results to our employee shape
-      const mapped = data.results.map((u, i) => ({
-        id: u.login?.uuid || `EMP-${i}`,
-        name: `${u.name?.first || ""} ${u.name?.last || ""}`.trim(),
-        image:
-          u.picture?.thumbnail ||
-          u.picture?.medium ||
-          "https://via.placeholder.com/40",
-      }));
-      setEmployees(mapped);
-    } catch (err) {
-      if (err.name === "AbortError") return; // ignore abort
-      console.error(err);
-      setError(err.message || "Failed to load users");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // map API user objects to the employee UI shape
   useEffect(() => {
-    const controller = new AbortController();
-    abortRef.current = controller;
-    fetchEmployees(controller.signal);
-    return () => controller.abort();
-  }, []);
+    const mapped = (subAdminsPayload.items || []).map((u) => ({
+      id: u.user_id || u._id || u.userId || "",
+      name:
+        `${u.Name || u.name || ""} ${u.last_name || ""}`.trim() ||
+        u.email ||
+        "Unknown",
+      image: u.user_image || u.user_image_url || null,
+      raw: u,
+      permissions: u.permissions || null,
+    }));
+    setEmployees(mapped);
+  }, [subAdminsPayload]);
   const navigate = useNavigate();
 
   return (
@@ -62,15 +48,15 @@ const AddSubAdmin = () => {
             </div>
           )}
 
-          {error && (
+          {isError && (
             <div className="p-3 border rounded-lg text-sm text-red-600">
-              Error: {error}
+              Error: {error?.message || "Failed to load users"}
             </div>
           )}
 
           {!loading && !error && employees.length === 0 && (
             <div className="p-3 border rounded-lg text-sm text-gray-600">
-              No employees found
+              No sub admins found
             </div>
           )}
 
