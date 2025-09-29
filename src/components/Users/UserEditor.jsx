@@ -31,6 +31,7 @@ export const UserEditor = ({ onSubmit, initialValues = null }) => {
       lastName: "",
       phone: "",
       email: "",
+      gender: "",
       userType: "",
       userCategory: "",
       street: "",
@@ -50,6 +51,8 @@ export const UserEditor = ({ onSubmit, initialValues = null }) => {
   }, [initialValues]);
 
   const USER_TYPES = ["Buyer", "Renter", "Seller", "Contractor", "Builder"];
+
+  const GENDERS = ["Male", "Female", "Other"];
 
   const USER_CATEGORIES = [
     "N/A",
@@ -174,6 +177,41 @@ export const UserEditor = ({ onSubmit, initialValues = null }) => {
                               value={type}
                             >
                               {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="gender"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Gender</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger className="rounded w-full">
+                          <SelectValue placeholder="Select Gender" />
+                        </SelectTrigger>
+                        <SelectContent
+                          VPClassName="p-0"
+                          className="border-0 shadow-none"
+                        >
+                          {GENDERS.map((g) => (
+                            <SelectItem
+                              className="border bg-accent focus:bg-primary focus:text-white"
+                              key={g}
+                              value={g}
+                            >
+                              {g}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -321,7 +359,11 @@ export const UserEditor = ({ onSubmit, initialValues = null }) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input placeholder="Aadhar/PAN" {...field} />
+                      <Input
+                        type="number"
+                        placeholder="Aadhar/PAN"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
