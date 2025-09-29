@@ -4,8 +4,8 @@ import { useState } from "react";
 import { UserEditor } from "@/components/Users/UserEditor";
 import { SuccessDialog } from "@/components/ui/SuccessDialog";
 import { useCreateUser } from "@/mutations/user";
-import extractApiError from "@/lib/errorHandler";
 
+const DEFAULT_PASSWORD = "1234567";
 function formatUserPayload(data = {}) {
   return {
     Name: data.Name ?? data.name ?? data.firstName ?? data.first_name ?? "",
@@ -26,7 +26,7 @@ function formatUserPayload(data = {}) {
     User_Category_id: data.User_Category_id ?? data.userCategoryId ?? 1,
     email: data.email ?? "",
     phone: data.phone ?? "",
-    password: data.password ?? "",
+    password: data.password ?? DEFAULT_PASSWORD,
     gender: data.gender ?? "",
     adhaar_date: data.adhaar_date ?? data.adhaarDate ?? data.adhaar_date ?? "",
     adhaar_no: data.adhaar_no ?? data.adhaarNo ?? "",
