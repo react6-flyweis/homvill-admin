@@ -288,11 +288,6 @@ export default function Settings() {
                           >
                             <EditIcon />
                           </button>
-
-                          <ChangePasswordDialog
-                            open={pwdOpen}
-                            onOpenChange={(v) => setPwdOpen(!!v)}
-                          />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -314,6 +309,11 @@ export default function Settings() {
               </div>
             </form>
           </Form>
+          <ChangePasswordDialog
+            open={pwdOpen}
+            currentPassword={apiUser?.password || ""}
+            onOpenChange={(v) => setPwdOpen(!!v)}
+          />
         </div>
       </div>
     </div>
