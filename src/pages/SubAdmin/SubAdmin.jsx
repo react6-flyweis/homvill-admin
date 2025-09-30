@@ -12,8 +12,7 @@ const AddSubAdmin = () => {
     isLoading: loading,
     isError,
     error,
-    refetch,
-  } = useGetUsersByRole(3, "active");
+  } = useGetUsersByRole(4, "active");
 
   // map API user objects to the employee UI shape
   useEffect(() => {
