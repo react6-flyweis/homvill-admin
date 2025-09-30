@@ -1,121 +1,172 @@
-import React from "react";
-import logo from "@/assets/logo.svg"; // replace with your logo file
-import houseImage from "@/assets/group2.svg"; // replace with your left image
-import { useNavigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-const LoginPage = () => {
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { PasswordInput } from "@/components/ui/password-input";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { RootFormErrors } from "@/components/RootFormErrors";
+import { useResetForgetPassword } from "@/queries/auth";
+import extractApiError from "@/lib/errorHandler";
+
+const passwordRegex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])/;
+
+const schema = z
+  .object({
+    newPassword: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .max(20, "Password must be at most 20 characters")
+      .regex(
+        passwordRegex,
+        "Password must include uppercase, lowercase, number and special character"
+      ),
+    confirmPassword: z.string().min(1, "Please re-enter password"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match",
+  });
+
+const NewPassword = () => {
   const navigate = useNavigate();
+  const { state } = useLocation();
+
+  // email and otp MUST come from router state
+  const emailFromRouter = state?.email;
+  const otpFromRouter = state?.otp;
+
+  const form = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: { newPassword: "", confirmPassword: "" },
+  });
+
+  const { mutateAsync, isLoading } = useResetForgetPassword();
+
+  useEffect(() => {
+    if (!emailFromRouter || !otpFromRouter) {
+      // redirect back to forgot if state missing
+      const t = setTimeout(() => navigate("/forgot"), 800);
+      return () => clearTimeout(t);
+    }
+  }, [emailFromRouter, otpFromRouter, navigate]);
+
+  const onSubmit = async (values) => {
+    if (!emailFromRouter || !otpFromRouter) {
+      form.setError("root", {
+        message: "Missing email or OTP. Please request OTP again.",
+      });
+      return;
+    }
+
+    try {
+      await mutateAsync({
+        email: emailFromRouter,
+        otp: String(otpFromRouter),
+        newPassword: values.newPassword,
+        confirmPassword: values.confirmPassword,
+      });
+      // on success navigate to login
+      navigate("/login", { replace: true });
+    } catch (err) {
+      form.setError("root", {
+        message:
+          extractApiError(err) || "An error occurred while resetting password.",
+      });
+    }
+  };
 
   return (
-    <div className="flex h-screen font-sans bg-[#D3DDE6]">
-      {/* Left Side */}
-      <div className="w-1/2 flex justify-center items-center relative">
-        {/* Logo */}
-        <div className="absolute top-6 left-16">
-          <img src={logo} alt="Logo" className="w-[182px] h-[38px]" />
-        </div>
+    <div className="max-w-md mx-auto">
+      <h2 className="text-[22px] font-semibold text-[#000000] text-center mb-2">
+        Set New Password
+      </h2>
 
-        {/* Fixed-size image */}
-        <div className="flex-none mt-4">
-          <img
-            src={houseImage}
-            alt="House"
-            className="w-auto h-[590px] object-contain"
+      <p className="text-center text-sm text-gray-600 mb-8">
+        Enter your new password here to continue with{" "}
+        <span className="font-semibold">HOMVILL</span>
+      </p>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <RootFormErrors errors={form.formState.errors.root} />
+
+          <FormField
+            control={form.control}
+            name="newPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="block text-[16px] text-[#7C838A] mb-1">
+                  Password
+                </FormLabel>
+                <FormControl>
+                  <PasswordInput
+                    {...field}
+                    className="w-full px-4 py-3 border bg-[#F3F5F6] border-gray-300 rounded-lg text-sm h-12"
+                    placeholder="Enter your Password here"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-      </div>
 
-      {/* Right Side */}
-      {/* <div style={{ fontFamily: 'Poppins' }} className="w-1/2 flex flex-col justify-center px-24 bg-white rounded-tl-2xl rounded-bl-2xl shadow-lg">
-                <div className="absolute top-6 right-6 text-sm text-gray-600 flex items-center gap-1">
-                    English (US) <span className="text-xs">▼</span>
-                </div>
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="block text-[16px] text-[#7C838A] mb-1">
+                  Re-Enter Password
+                </FormLabel>
+                <FormControl>
+                  <PasswordInput
+                    {...field}
+                    className="w-full px-4 py-3 border bg-[#F3F5F6] border-gray-300 rounded-lg text-sm h-12"
+                    placeholder="Re-Enter Password"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-                <h2 className="text-[26px] text-center text-[#000000] font-semibold mb-6">Forgot Password</h2>
+          <div className="flex flex-col items-center">
+            <LoadingButton
+              type="submit"
+              isLoading={form.formState.isSubmitting || isLoading}
+              className="w-[340px] bg-[#8A1538] text-white py-2 rounded-lg font-medium text-[18px] h-12"
+            >
+              Save
+            </LoadingButton>
+          </div>
+        </form>
+      </Form>
 
-                <label className="block text-[20px] text-[#7C838A] mb-1">Email</label>
-                <input
-                    type="email"
-                    placeholder="Enter your Email here"
-                    className="w-full mb-4 rounded-xl px-4 py-3 border bg-[#B0BAC340] border-gray-300 rounded-lg text-sm "
-                />
-
-
-
-                <div className="flex justify-center">
-                    <button className="w-[340px] bg-[#8A1538] text-white py-2 rounded-lg font-medium text-[24px]">
-                        Continue
-                    </button></div>
-
-            </div> */}
-      {/* Right Side */}
-      {/* Right Side */}
-      <div
-        style={{ fontFamily: "Poppins" }}
-        className="w-1/2 flex flex-col justify-center px-24 bg-white rounded-tl-2xl rounded-bl-2xl shadow-lg relative"
-      >
-        {/* Language Selector */}
-        <div className="absolute top-6 right-6 text-sm text-gray-600 flex items-center gap-1">
-          English (US) <span className="text-xs">▼</span>
-        </div>
-
-        {/* Title */}
-        <h2 className="text-[22px] font-semibold text-[#000000] text-center mb-2">
-          Set New Password
-        </h2>
-
-        {/* Subtitle */}
-        <p className="text-center text-sm text-gray-600 mb-8">
-          Enter your new password here to continue with{" "}
-          <span className="font-semibold">HOMVILL</span>
+      <div className="mt-6 text-sm text-gray-600">
+        <p className="mb-2">
+          <span className="font-semibold">Length:</span> Minimum 8 characters,
+          maximum 20 characters.
         </p>
-
-        {/* Password */}
-        <label className="block text-[16px] text-[#000000] mb-1">
-          Password
-        </label>
-        <input
-          type="password"
-          placeholder="Enter your Password here"
-          className="w-full mb-1 rounded-xl px-4 py-3 border border-gray-300 bg-[#B0BAC340] text-sm outline-none"
-        />
-        <p className="text-xs text-gray-400 mb-4">e.g. P@ssword2024</p>
-
-        {/* Re-enter Password */}
-        <label className="block text-[16px] text-[#000000] mb-1">
-          Re-Enter Password
-        </label>
-        <input
-          type="password"
-          placeholder="Re-Enter Password"
-          className="w-full mb-1 rounded-xl px-4 py-3 border border-gray-300 bg-[#B0BAC340] text-sm outline-none"
-        />
-        <p className="text-xs text-gray-400 mb-6">e.g. P@ssword2024</p>
-
-        {/* Save Button */}
-        <div className="flex justify-center">
-          <button className="w-[340px] bg-[#8A1538] text-white py-2 rounded-lg font-medium text-[18px]">
-            Save
-          </button>
-        </div>
-
-        {/* Password Requirements */}
-        <div className="mt-6 text-sm text-gray-600">
-          <p className="mb-2">
-            <span className="font-semibold">Length:</span> Minimum 8 characters,
-            maximum 20 characters.
-          </p>
-          <p className="mb-1 font-semibold">Complexity:</p>
-          <ul className="list-disc list-inside space-y-1 text-gray-600">
-            <li>Uppercase Letter (A–Z)</li>
-            <li>Lowercase Letter (a–z)</li>
-            <li>Number (0–9)</li>
-            <li>Special Character (@#$%^&amp;*()-_+=[]{}|.,?)</li>
-          </ul>
-        </div>
+        <p className="mb-1 font-semibold">Complexity:</p>
+        <ul className="list-disc list-inside space-y-1 text-gray-600">
+          <li>Uppercase Letter (A–Z)</li>
+          <li>Lowercase Letter (a–z)</li>
+          <li>Number (0–9)</li>
+          <li>Special Character (@#$%^&amp;*()-_+=[]{}|.,?)</li>
+        </ul>
       </div>
     </div>
   );
 };
 
-export default LoginPage;
+export default NewPassword;
