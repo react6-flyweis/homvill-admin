@@ -1,6 +1,12 @@
 import React, { useEffect } from "react";
 import { PageLayout } from "@/components/layouts/PageLayout";
-import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
+import extractApiError from "@/lib/errorHandler";
+import {
+  useCreateSubadminPermission,
+  useUpdateSubadminPermission,
+} from "@/mutations/subadminPermission";
+import { useGetSubadminPermissionByUser } from "@/queries/subadminPermission";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import {
@@ -12,6 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
 
 export default function Permissions() {
   const location = useLocation();
@@ -29,26 +36,137 @@ export default function Permissions() {
     },
   });
 
+  // mutation hook for creating/updating sub-admin permissions
+  const createPermission = useCreateSubadminPermission();
+  const updatePermission = useUpdateSubadminPermission();
+
+  // try to load existing permissions for this user
+  const userId = employee?.id || null;
+  const { data: existingPermRes, isLoading: loadingPerm } =
+    useGetSubadminPermissionByUser(userId, {
+      enabled: !!userId,
+    });
+
+  // when fetched, normalize and seed form if permissions available
+  useEffect(() => {
+    const perm = existingPermRes?.data || existingPermRes || null;
+    if (perm) {
+      // perm might have keys like User, Properties etc. Map to our form shape
+      form.reset({
+        users: {
+          edit: !!(perm.User && perm.User[0] && perm.User[0].Edit),
+          view: !!(perm.User && perm.User[0] && perm.User[0].View),
+        },
+        properties: {
+          edit: !!(
+            perm.Properties &&
+            perm.Properties[0] &&
+            perm.Properties[0].Edit
+          ),
+          view: !!(
+            perm.Properties &&
+            perm.Properties[0] &&
+            perm.Properties[0].View
+          ),
+        },
+        contracts: {
+          edit: !!(
+            perm.Contracts &&
+            perm.Contracts[0] &&
+            perm.Contracts[0].Edit
+          ),
+          view: !!(
+            perm.Contracts &&
+            perm.Contracts[0] &&
+            perm.Contracts[0].View
+          ),
+        },
+        subscription: {
+          edit: !!(
+            perm.Subscription &&
+            perm.Subscription[0] &&
+            perm.Subscription[0].Edit
+          ),
+          view: !!(
+            perm.Subscription &&
+            perm.Subscription[0] &&
+            perm.Subscription[0].View
+          ),
+        },
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [existingPermRes]);
+
   // seed defaults if employee exists (demo)
   useEffect(() => {
     if (employee) {
       form.reset({
         // prefer passed permissions when available
         ...(passedPermissions || {
-          users: { edit: true, view: true },
-          properties: { edit: false, view: true },
+          users: { edit: false, view: false },
+          properties: { edit: false, view: false },
           contracts: { edit: false, view: false },
-          subscription: { edit: false, view: true },
+          subscription: { edit: false, view: false },
         }),
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [employee]);
 
-  function onSubmit(values) {
-    // In a real app you'd send `values` to the backend
-    console.log("Saving permissions for", employee, values);
-    navigate(-1);
+  async function onSubmit(values) {
+    // Build payload according to API schema provided by user
+    const payload = {
+      user_id: employee?.id || null,
+      User: [
+        {
+          Edit: !!values.users?.edit,
+          View: !!values.users?.view,
+        },
+      ],
+      Properties: [
+        {
+          Edit: !!values.properties?.edit,
+          View: !!values.properties?.view,
+        },
+      ],
+      Contracts: [
+        {
+          Edit: !!values.contracts?.edit,
+          View: !!values.contracts?.view,
+        },
+      ],
+      Subscription: [
+        {
+          Edit: !!values.subscription?.edit,
+          View: !!values.subscription?.view,
+        },
+      ],
+      ApprovedStatus: true,
+      Description: null,
+    };
+
+    try {
+      // if existing permission object exists, call update endpoint else create
+      const existing = existingPermRes?.data || existingPermRes || null;
+      if (existing) {
+        // include identifier if API expects it
+        const updatePayload = {
+          ...payload,
+          id: existing.SubAdmin_Permission_id,
+        };
+        await updatePermission.mutateAsync(updatePayload);
+        toast.success("Permissions updated successfully");
+      } else {
+        await createPermission.mutateAsync(payload);
+        toast.success("Permissions added successfully");
+      }
+
+      navigate(-1);
+    } catch (err) {
+      const msg = extractApiError(err);
+      form.setError("root", { type: "server", message: msg });
+    }
   }
 
   const resources = [
@@ -136,9 +254,16 @@ export default function Permissions() {
             </div>
 
             <div className="mt-6 flex items-end justify-end">
-              <Button type="submit" size="lg" className="rounded ">
+              <LoadingButton
+                type="submit"
+                size="lg"
+                className="rounded "
+                isLoading={
+                  createPermission.isLoading || form.formState.isSubmitting
+                }
+              >
                 {isEdit ? "Save Changes" : "Create Sub Admin"}
-              </Button>
+              </LoadingButton>
             </div>
           </form>
         </Form>
