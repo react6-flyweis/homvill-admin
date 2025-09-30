@@ -11,6 +11,13 @@ const ChatInput = ({ value, onChange, onSend }) => {
           placeholder="Type message here..."
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => {
+            // Send on Enter (but allow Shift+Enter for newline if needed)
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              onSend && onSend();
+            }
+          }}
           className="border-0 focus:ring-0 outline-0 "
         />
         <Button
