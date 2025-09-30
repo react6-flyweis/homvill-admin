@@ -18,6 +18,7 @@ import { useAdminLogin } from "@/queries/auth";
 import { useAuthStore } from "@/store/authStore";
 import { RootFormErrors } from "@/components/RootFormErrors";
 import { LoadingButton } from "@/components/ui/loading-button";
+import extractApiError from "@/lib/errorHandler";
 
 const loginSchema = z.object({
   email: z.string().email("Please provide a valid email"),
@@ -52,7 +53,8 @@ export function LoginForm() {
       });
       navigate("/dashboard");
     } catch (err) {
-      form.setError("root", { message: "An error occurred" });
+      const message = extractApiError(err);
+      form.setError("root", { message: message || "An error occurred" });
     }
   };
 
