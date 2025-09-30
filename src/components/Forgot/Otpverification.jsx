@@ -1,101 +1,153 @@
 import React from "react";
-import logo from "@/assets/logo.svg"; // replace with your logo file
-import houseImage from "@/assets/group2.svg"; // replace with your left image
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-const LoginPage = () => {
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { RootFormErrors } from "@/components/RootFormErrors";
+import { useVerifyForgetPasswordOtp } from "@/queries/auth";
+import OtpTimerResend from "./OtpTimerResend";
+import extractApiError from "@/lib/errorHandler";
+import OtpInputs from "@/components/Forgot/OtpInputs";
+
+const otpSchema = z.object({
+  email: z.string().email().optional(),
+  otp: z
+    .string()
+    .min(4, "OTP must be at least 4 characters")
+    .max(6, "OTP must be at most 6 characters"),
+});
+
+const Otpverification = () => {
   const navigate = useNavigate();
+  const { state } = useLocation();
+
+  // email MUST come from router state (we don't add an extra email field)
+  const emailFromRouter = state?.email;
+
+  // If email is missing, we should redirect back to the forgot page
+
+  // pre-fill otp if passed via navigation state
+  const form = useForm({
+    resolver: zodResolver(otpSchema),
+    defaultValues: {
+      otp: state?.otp ? String(state.otp) : "",
+    },
+  });
+
+  const mutation = useVerifyForgetPasswordOtp();
+  const [infoMessage, setInfoMessage] = useState("");
+
+  // refs and state for digit inputs
+  // OTP inputs are rendered by OtpInputs child component
+
+  const onSubmit = async (values) => {
+    if (!emailFromRouter) {
+      form.setError("root", {
+        message: "Email is missing. Please request OTP again.",
+      });
+      return;
+    }
+
+    try {
+      await mutation.mutateAsync({
+        email: emailFromRouter,
+        otp: values.otp,
+      });
+      // on success navigate to new password page, pass email along
+      navigate("/forgot/newpassword", {
+        replace: true,
+        state: { email: emailFromRouter, otp: values.otp },
+      });
+    } catch (err) {
+      form.setError("root", {
+        message:
+          extractApiError(err) || "An error occurred while verifying OTP.",
+      });
+    }
+  };
+
+  // If email is missing, redirect user back to forgot page to re-enter email
+  useEffect(() => {
+    if (!emailFromRouter) {
+      // small timeout so user sees page briefly if they were navigated here accidentally
+      const t = setTimeout(() => navigate("/forgot"), 800);
+      return () => clearTimeout(t);
+    }
+  }, [emailFromRouter, navigate]);
+
+  // resend/timer handled by OtpTimerResend child
 
   return (
-    <div className="flex h-screen font-sans bg-[#D3DDE6]">
-      {/* Left Side */}
-      <div className="w-1/2 flex justify-center items-center relative">
-        {/* Logo */}
-        <div className="absolute top-6 left-16">
-          <img src={logo} alt="Logo" className="w-[182px] h-[38px]" />
-        </div>
+    <div className="max-w-md mx-auto">
+      <h2 className="text-[20px] font-semibold text-[#000000] mb-2">
+        OTP Verification
+      </h2>
+      <p className="text-center text-sm text-gray-500 mb-2">
+        Our team already sent you an email in your email{" "}
+        <span className="text-[#8A1538] font-medium">
+          {emailFromRouter || "example@gmail.com"}
+        </span>{" "}
+        to access back your account.
+      </p>
 
-        {/* Fixed-size image */}
-        <div className="flex-none mt-4">
-          <img
-            src={houseImage}
-            alt="House"
-            className="w-auto h-[590px] object-contain"
-          />
-        </div>
-      </div>
+      {infoMessage ? (
+        <p className="text-center text-sm text-green-600 mb-4">{infoMessage}</p>
+      ) : null}
 
-      {/* Right Side */}
-      {/* <div style={{ fontFamily: 'Poppins' }} className="w-1/2 flex flex-col justify-center px-24 bg-white rounded-tl-2xl rounded-bl-2xl shadow-lg">
-                <div className="absolute top-6 right-6 text-sm text-gray-600 flex items-center gap-1">
-                    English (US) <span className="text-xs">▼</span>
-                </div>
+      {/* Timer and resend handled by child component */}
+      <OtpTimerResend
+        email={emailFromRouter}
+        onInfo={(m) => setInfoMessage(m)}
+      />
 
-                <h2 className="text-[26px] text-center text-[#000000] font-semibold mb-6">Forgot Password</h2>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <RootFormErrors errors={form.formState.errors.root} />
 
-                <label className="block text-[20px] text-[#7C838A] mb-1">Email</label>
-                <input
-                    type="email"
-                    placeholder="Enter your Email here"
-                    className="w-full mb-4 rounded-xl px-4 py-3 border bg-[#B0BAC340] border-gray-300 rounded-lg text-sm "
+          {/* no email input - email is sourced from router state */}
+
+          <FormField
+            control={form.control}
+            name="otp"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="block text-[16px] text-[#7C838A] mb-1">
+                  OTP
+                </FormLabel>
+                <OtpInputs
+                  value={field.value}
+                  onChange={field.onChange}
+                  length={6}
                 />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-
-
-                <div className="flex justify-center">
-                    <button className="w-[340px] bg-[#8A1538] text-white py-2 rounded-lg font-medium text-[24px]">
-                        Continue
-                    </button></div>
-
-            </div> */}
-      {/* Right Side */}
-      <div
-        style={{ fontFamily: "Poppins" }}
-        className="w-1/2 flex flex-col justify-center items-center px-24 bg-white rounded-tl-2xl rounded-bl-2xl shadow-lg relative"
-      >
-        {/* Language Selector */}
-        <div className="absolute top-6 right-6 text-sm text-gray-600 flex items-center gap-1">
-          English (US) <span className="text-xs">▼</span>
-        </div>
-
-        {/* Title */}
-        <h2 className="text-[20px] font-semibold text-[#000000] mb-2">
-          OTP Verification
-        </h2>
-
-        {/* Subtitle */}
-        <p className="text-center text-sm text-gray-500 mb-6">
-          Our team already sent you an email in your email{" "}
-          <span className="text-[#8A1538] font-medium">example@gmail.com</span>{" "}
-          to access back your account.
-        </p>
-
-        {/* Timer */}
-        <div className="text-lg font-semibold text-gray-800 mb-6">03:17</div>
-
-        {/* OTP Input Boxes */}
-        <div className="flex gap-3 mb-6">
-          {[2, "", "", "", "", ""].map((value, index) => (
-            <input
-              key={index}
-              type="text"
-              maxLength="1"
-              defaultValue={value}
-              className="w-12 h-12 text-center text-lg font-semibold border border-gray-300 rounded-md focus:outline-none focus:border-[#8A1538]"
-            />
-          ))}
-        </div>
-
-        {/* Continue Button */}
-        <button
-          onClick={() => navigate("/newpassword")}
-          className="w-[340px] bg-[#8A1538] text-white py-2 rounded-lg font-medium text-[18px]"
-        >
-          Continue
-        </button>
-      </div>
+          <div className="flex flex-col items-center">
+            <LoadingButton
+              type="submit"
+              isLoading={form.formState.isSubmitting || mutation.isLoading}
+              className="w-[340px] bg-[#8A1538] text-white py-2 rounded-lg font-medium text-[18px] h-12"
+            >
+              Continue
+            </LoadingButton>
+          </div>
+        </form>
+      </Form>
     </div>
   );
 };
 
-export default LoginPage;
+export default Otpverification;
