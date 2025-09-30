@@ -38,9 +38,16 @@ const Forgot = () => {
       // navigate to OTP verification page and pass email in state
       navigate("/forgot/otpverification", {
         replace: true,
-        state: { email: values.email, otpResponse: res },
+        state: { email: values.email, otp: res.OTP },
       });
     } catch (err) {
+      const otp = err.response?.data.OTP;
+      if (otp) {
+        navigate("/forgot/otpverification", {
+          replace: true,
+          state: { email: values.email, otp },
+        });
+      }
       form.setError("root", {
         message: extractApiError(err) || "An error Occurred.",
       });
