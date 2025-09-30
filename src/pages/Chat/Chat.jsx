@@ -59,9 +59,8 @@ const ChatUI = () => {
           meta: c.meta || {},
           name: (c.meta && c.meta.name) || `Conversation ${c.id}`,
           avatar: (c.meta && c.meta.avatar) || "https://i.pravatar.cc/300",
-          // compute other participant name/avatar if possible
+          // compute other participant name/avatar
           otherName: (() => {
-            if (c.meta && c.meta.name) return c.meta.name;
             const me = authUser.user_id;
             const other = (c.participants || []).find(
               (p) => String(p) !== String(me)
@@ -312,18 +311,23 @@ const ChatUI = () => {
             <ChatTopBar
               title={
                 currentChat
-                  ? getOtherName(currentChat)
+                  ? currentChat.otherName || getOtherName(currentChat)
                   : "No conversation selected"
               }
               description={currentChat ? `ID: #${currentChat.id}` : ""}
+              avatar={currentChat?.otherAvatar}
             />
           </div>
 
           <ChatConversation
             messages={currentChat ? currentChat.messages : []}
-            otherName={currentChat ? currentChat.name : ""}
+            otherName={
+              currentChat ? currentChat.otherName || currentChat.name : ""
+            }
             otherAvatar={
-              currentChat ? currentChat.avatar : "https://i.pravatar.cc/300"
+              currentChat
+                ? currentChat.otherAvatar || currentChat.avatar
+                : "https://i.pravatar.cc/300"
             }
             myName={"You"}
             myAvatar="https://i.pravatar.cc/300"
