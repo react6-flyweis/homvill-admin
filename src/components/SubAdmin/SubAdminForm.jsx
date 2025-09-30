@@ -13,10 +13,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Button } from "@/components/ui/button";
+import { useCreateUser } from "@/mutations/user";
+import extractApiError from "@/lib/errorHandler";
+import { RootFormErrors } from "@/components/RootFormErrors";
+import { LoadingButton } from "@/components/ui/loading-button";
 
 const schema = z
   .object({
     employeeId: z.string().min(1, "Employee ID is required"),
+    email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     rePassword: z.string().min(1, "Please re-enter password"),
   })
@@ -26,34 +31,59 @@ const schema = z
   });
 
 export const SubAdminForm = ({ initialEmployeeId = "", onCreate }) => {
+  const createUser = useCreateUser();
+
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
       employeeId: initialEmployeeId,
+      email: "",
       password: "",
       rePassword: "",
     },
   });
   const navigate = useNavigate();
 
-  const onSubmit = (data) => {
-    // trim employee id and pass only needed fields
+  const onSubmit = async (data) => {
     const trimmedId = data.employeeId.trim();
-    const payload = { employeeId: trimmedId, password: data.password };
-    onCreate?.(payload);
 
-    // build a minimal employee object to pass to permissions page
-    const employee = {
-      id: trimmedId,
-      name: trimmedId, // no name provided from form; use id as fallback
-      image: "https://via.placeholder.com/40",
+    const payload = {
+      Name: trimmedId,
+      last_name: "",
+      Responsibility_id: 1,
+      Role_id: 4,
+      Language_id: 1,
+      Country_id: 1,
+      State_id: 1,
+      City_id: 1,
+      zipcode: null,
+      Employee_id: trimmedId,
+      User_Category_id: 1,
+      email: data.email?.trim() ?? "",
+      phone: "1234567890",
+      password: data.password ?? "1234567",
+      gender: "Male",
+      adhaar_date: "",
+      adhaar_no: "",
     };
 
-    // navigate to permissions page and pass the employee in state
-    navigate(`/dashboard/sub-admin/permissions`, { state: { employee } });
+    try {
+      // call create user API
+      const res = await createUser.mutateAsync(payload);
 
-    // reset password fields after create
-    form.reset({ employeeId: initialEmployeeId, password: "", rePassword: "" });
+      // build a minimal employee object to pass to permissions page
+      const employee = {
+        id: trimmedId,
+        name: trimmedId, // no name provided from form; use id as fallback
+        image: "https://via.placeholder.com/40",
+      };
+
+      // navigate to permissions page and pass the employee in state
+      navigate(`/dashboard/sub-admin/permissions`, { state: { employee } });
+    } catch (err) {
+      const msg = extractApiError(err);
+      form.setError("root", { type: "server", message: msg });
+    }
   };
 
   return (
@@ -72,6 +102,22 @@ export const SubAdminForm = ({ initialEmployeeId = "", onCreate }) => {
               </FormLabel>
               <FormControl>
                 <Input placeholder="enter id" className="h-10" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem className="mt-4">
+              <FormLabel>
+                Email <span className="text-red-500">*</span>
+              </FormLabel>
+              <FormControl>
+                <Input placeholder="enter email" className="h-10" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -118,6 +164,8 @@ export const SubAdminForm = ({ initialEmployeeId = "", onCreate }) => {
           )}
         />
 
+        <RootFormErrors errors={form.formState.errors.root} />
+
         <div className="flex justify-end gap-3 mt-6">
           <Button
             variant="outline"
@@ -132,7 +180,9 @@ export const SubAdminForm = ({ initialEmployeeId = "", onCreate }) => {
           >
             Cancel
           </Button>
-          <Button type="submit">Create</Button>
+          <LoadingButton type="submit" isLoading={form.formState.isSubmitting}>
+            create
+          </LoadingButton>
         </div>
       </form>
     </Form>
