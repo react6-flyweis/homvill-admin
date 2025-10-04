@@ -41,9 +41,16 @@ export default function UsersPage() {
       : "-",
     verified: !!u.two_step_verification,
     active: !!u.account_active,
-    // keep raw API object available without overwriting mapped keys
     raw: u,
   }));
+
+  // apply active/inactive/all filter
+  const filteredData = data.filter((row) => {
+    if (filter === "all") return true;
+    if (filter === "active") return !!row.active;
+    if (filter === "inactive") return !row.active;
+    return true;
+  });
 
   const tabs = [
     { id: "all", label: "All Users", count: usersPayload.count || 0 },
@@ -124,7 +131,7 @@ export default function UsersPage() {
         <DataTable
           ref={tableRef}
           columns={usersColumns}
-          data={data}
+          data={filteredData}
           showPagination={true}
           pageSize={5}
           loading={isLoading}
