@@ -62,7 +62,7 @@ import { EyeIcon, Trash2Icon } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUpdateUser } from "@/mutations/user";
 import { toast } from "sonner";
 import { extractApiError } from "@/lib/errorHandler";
@@ -73,6 +73,16 @@ function UpdateSwitch({ active, id }) {
   const [checked, setChecked] = useState(active ?? true);
   const [isSaving, setIsSaving] = useState(false);
   const mutation = useUpdateUser();
+
+  // keep internal checked state in sync when parent changes `active`
+  useEffect(() => {
+    // if a save is in progress, prefer optimistic local state until it settles
+    if (isSaving) return;
+
+    // coerce to boolean and only update when different
+    const next = !!active;
+    if (next !== checked) setChecked(next);
+  }, [active, isSaving, checked]);
 
   const handleToggle = async (next) => {
     const prev = checked;
@@ -147,10 +157,7 @@ export const usersColumns = [
     id: "actions",
     cell: ({ row }) => {
       // row.original contains the original data object for this row
-      const {
-        id,
-        raw: { account_active },
-      } = row.original;
+      const { id, active } = row.original;
 
       return (
         <div className="flex items-center justify-end">
@@ -162,7 +169,7 @@ export const usersColumns = [
           <Button variant="ghost" size="icon" title="Delete">
             <Trash2Icon className="text-destructive" size={16} />
           </Button>
-          <UpdateSwitch id={id} active={account_active} />
+          <UpdateSwitch id={id} active={active} />
         </div>
       );
     },
