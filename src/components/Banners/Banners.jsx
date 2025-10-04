@@ -14,10 +14,6 @@ export default function Banners() {
   const { data: bannersPayload = { items: [], count: 0 }, isLoading } =
     useGetAllBanners();
 
-  const handleSaveBanner = (values) => {
-    console.log("Saving banner with values:", values);
-  };
-
   return (
     <div className="">
       {/* Header */}
@@ -66,12 +62,7 @@ export default function Banners() {
                 id: b._id || b.Banners_id || idx,
                 category: b.Catetory_id || b.category || "",
                 headline: b.headline || b.Headline || "",
-                // construct image url if banner_image is provided, else fallback to sample
-                image: b.banner_image
-                  ? (import.meta.env.VITE_API_BASE || "") +
-                    "/uploads/" +
-                    b.banner_image
-                  : sampleImages[idx % sampleImages.length],
+                image: b.banner_image,
                 raw: b,
               };
 
@@ -81,7 +72,7 @@ export default function Banners() {
             {/* Upload new banner card */}
             <button
               onClick={() => setOpen(true)}
-              className="flex items-center justify-center border-2 border-dashed border-[#8A1538] rounded-xl "
+              className="flex items-center justify-center border-2  min-h-40 border-dashed border-[#8A1538] rounded-xl "
             >
               <div className="flex flex-col items-center text-[#8B1C32]">
                 <Plus size={24} />
@@ -93,13 +84,7 @@ export default function Banners() {
           </>
         )}
       </div>
-      <BannerEditor
-        open={open}
-        onOpenChange={setOpen}
-        onSave={(values) => {
-          handleSaveBanner(values);
-        }}
-      />
+      <BannerEditor open={open} onOpenChange={setOpen} />
     </div>
   );
 }
