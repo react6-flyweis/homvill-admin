@@ -39,6 +39,7 @@ import { CountrySelect } from "@/components/Users/CountrySelect";
 import { CitySelect } from "@/components/Users/CitySelect";
 import { useUpdateProfile } from "@/mutations/user";
 import { useAuthStore } from "@/store/authStore";
+import { DatePicker } from "@/components/ui/DatePicker";
 import extractApiError from "@/lib/errorHandler";
 
 export default function Settings() {
@@ -78,6 +79,7 @@ export default function Settings() {
       phone: user.phone || "",
       email: user.email || "",
       gender: user.gender || "",
+      dateOfBirth: user.birthday || "",
       address: "",
       postalCode: "",
       country: user.Country_id?.Country_name || "",
@@ -95,6 +97,7 @@ export default function Settings() {
       id: userId,
       Name: data.firstName,
       last_name: data.lastName,
+      birthday: data.dateOfBirth,
       ...data,
     };
     try {
@@ -166,7 +169,7 @@ export default function Settings() {
                     <FormItem>
                       <FormLabel>Date Of Birth</FormLabel>
                       <FormControl>
-                        <Input type="date" {...field} />
+                        <DatePicker {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
