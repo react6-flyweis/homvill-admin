@@ -5,6 +5,7 @@ import { PageLayout } from "@/components/layouts/PageLayout";
 import { useCreatePromoCode } from "@/mutations/promoCode";
 import extractApiError from "@/lib/errorHandler";
 import { PromoForm } from "./PromoForm";
+import { toast } from "sonner";
 
 export default function CreatePromoCode() {
   const navigate = useNavigate();
