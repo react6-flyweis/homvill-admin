@@ -114,7 +114,7 @@ const NotificationsTable = () => {
                   <td className="px-4 py-2">
                     <button
                       onClick={() => {
-                        setToDelete(item._id || item.push_notification_id);
+                        setToDelete(item.push_notification_id);
                         setShowDelete(true);
                       }}
                       className="text-red-500 hover:text-red-700"
