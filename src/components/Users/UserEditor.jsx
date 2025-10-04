@@ -23,6 +23,7 @@ import {
 import { LoadingButton } from "@/components/ui/loading-button";
 import extractApiError from "@/lib/errorHandler";
 import { RootFormErrors } from "@/components/RootFormErrors";
+import DatePicker from "@/components/ui/DatePicker";
 
 export const UserEditor = ({ onSubmit, initialValues = null }) => {
   const form = useForm({
@@ -346,7 +347,7 @@ export const UserEditor = ({ onSubmit, initialValues = null }) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <DatePicker {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
