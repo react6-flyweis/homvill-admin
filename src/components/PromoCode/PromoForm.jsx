@@ -62,10 +62,10 @@ const promoSchema = z.object({
         .regex(/^\d*(?:\.\d+)?$/)
         .transform((s) => (s === "" ? undefined : Number(s)))
     ),
-  startDate: z.string().optional(),
-  startTime: z.string().optional(),
-  endDate: z.string().optional(),
-  endTime: z.string().optional(),
+  startDate: z.string().min(1, "Start date is required"),
+  startTime: z.string().min(1, "Start time is required"),
+  endDate: z.string().min(1, "End date is required"),
+  endTime: z.string().min(1, "End time is required"),
 });
 
 export function PromoForm({ defaultValues = {}, onSubmit }) {
@@ -226,9 +226,8 @@ export function PromoForm({ defaultValues = {}, onSubmit }) {
                     <SelectValue placeholder="Select any" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">Select any</SelectItem>
-                    <SelectItem value="area1">Area 1</SelectItem>
-                    <SelectItem value="area2">Area 2</SelectItem>
+                    <SelectItem value="1">Area 1</SelectItem>
+                    <SelectItem value="2">Area 2</SelectItem>
                   </SelectContent>
                 </Select>
               </FormControl>
