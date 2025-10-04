@@ -4,42 +4,34 @@ import { NewUsersTable } from "@/components/Overview/NewUsersTable";
 import { EarningChart } from "@/components/Overview/EarningChart";
 import { StatCard } from "@/components/Overview/StatCard";
 
-import totalUsersImg from "@/assets/group3.svg";
-import listedStatesImg from "@/assets/frame.svg";
+import TotalUsersCard from "@/components/Overview/TotalUsersCard";
+import ListedStates from "@/components/Overview/ListedStates";
 import wallet from "@/assets/wallet.svg";
 import head from "@/assets/head.svg";
 import bag from "@/assets/bag.svg";
 import table from "@/assets/table.svg";
+import { useAuthStore } from "@/store/authStore";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
+
+  const displayName = `${user?.Name ?? ""} ${user?.last_name ?? ""}`.trim();
 
   return (
     <div className=" bg-white">
-      {/* Top section: two images side by side */}
-      <div className="flex gap-6 mb-6">
-        {/* Total Users Card Image */}
-        <div className="flex bg-white w-[680px] rounded-xl overflow-hidden ">
-          <img
-            src={totalUsersImg}
-            alt="Total Users"
-            className=" object-contain"
-          />
+      {/* Top section: total users card (dynamic) and listed states */}
+
+      <div className="text-lg">
+        Good Morning,{" "}
+        <span className="text-2xl text-primary  font-bold">{displayName}</span>
+      </div>
+      <div className="grid grid-cols-3 gap-5">
+        <div className="col-span-2">
+          <TotalUsersCard />
         </div>
 
-        <div className="flex-1 bg-white rounded-xl overflow-hidden mt-14 shadow h-[287.2px] relative">
-          {/* Text Overlay */}
-          <div className="absolute top-3 left-3 text-white font-semibold text-lg z-10">
-            All Listed States
-          </div>
-
-          {/* Image */}
-          <img
-            src={listedStatesImg}
-            alt="All Listed States"
-            className="w-full h-full object-cover"
-          />
-        </div>
+        <ListedStates />
       </div>
 
       {/* Bottom section - example placeholders */}
