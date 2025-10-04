@@ -42,7 +42,7 @@ export function BannerCard({ banner }) {
         <BannerEditor
           open={openEdit}
           onOpenChange={setOpenEdit}
-          initialValues={banner}
+          initialValues={banner.raw}
         />
       )}
     </div>
