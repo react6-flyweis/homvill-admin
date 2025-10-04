@@ -81,43 +81,85 @@ const EarningsPage = () => {
     return Number.isNaN(n) ? 0 : n;
   };
 
-  // Apply filters to the data
+  // Apply filters to the data (source + period/date-range)
+  const parseRowDate = (d) => {
+    // row.date is produced as dd/mm/yyyy
+    if (!d) return null;
+    const parts = String(d).split("/");
+    if (parts.length !== 3) return null;
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const year = parseInt(parts[2], 10);
+    if (Number.isNaN(day) || Number.isNaN(month) || Number.isNaN(year))
+      return null;
+    return new Date(year, month, day);
+  };
+
+  const isBetween = (d, a, b) => {
+    if (!d || !a || !b) return false;
+    return d.getTime() >= a.getTime() && d.getTime() <= b.getTime();
+  };
+
+  // derive period start/end from either explicit dateRange or the selected period
+  const getPeriodRange = () => {
+    if (dateRange?.from && dateRange?.to) {
+      return { start: new Date(dateRange.from), end: new Date(dateRange.to) };
+    }
+
+    const now = new Date();
+    if (periodFilter === "monthly") {
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      const end = new Date(
+        now.getFullYear(),
+        now.getMonth() + 1,
+        0,
+        23,
+        59,
+        59,
+        999
+      );
+      return { start, end };
+    }
+    if (periodFilter === "weekly") {
+      const end = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        23,
+        59,
+        59,
+        999
+      );
+      const start = new Date(end.getTime() - 6 * 24 * 60 * 60 * 1000); // last 7 days
+      return { start, end };
+    }
+    // yearly by default
+    const start = new Date(now.getFullYear(), 0, 1);
+    const end = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+    return { start, end };
+  };
+
+  const { start: periodStart, end: periodEnd } = getPeriodRange();
+
   const filteredData = (tableData || []).filter((row) => {
     // source filter
     if (sourceFilter && sourceFilter !== "all") {
       if (row.source !== sourceFilter) return false;
     }
 
-    // period filter (simple demo implementation: yearly/monthly/weekly)
-    // For demo: keep all rows for yearly, filter by month for monthly, by range for weekly.
-    if (periodFilter === "monthly") {
-      // assume monthly = June (06) for demo (since sample data mostly in June)
-      return /\/06\//.test(row.date);
-    }
-    if (periodFilter === "weekly") {
-      // demo: pick dates between 10/06 and 20/06
-      const parts = row.date.split("/");
-      const day = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10);
-      if (month === 6 && day >= 10 && day <= 20) return true;
-      return false;
-    }
+    // date / period filter
+    const d = parseRowDate(row.date);
+    if (!d) return false; // if no valid date, exclude
+
+    if (!isBetween(d, periodStart, periodEnd)) return false;
 
     return true;
   });
 
-  // compute total from table if available (table filters will reflect Selects)
-  let totalEarningsNumber = filteredData.reduce((sum, row) => {
+  // compute total from the filtered rows
+  let totalEarningsNumber = (filteredData || []).reduce((sum, row) => {
     return sum + parseAmount(row.amount);
   }, 0);
-  const table = tableRef?.current;
-  if (table && typeof table.getRowModel === "function") {
-    const rows = table.getRowModel().flatRows;
-    totalEarningsNumber = rows.reduce(
-      (s, r) => s + parseAmount(r.original.amount),
-      0
-    );
-  }
 
   // Format as currency, e.g., $1,234,567.00
   const formattedTotal = new Intl.NumberFormat("en-US", {
@@ -232,7 +274,7 @@ const EarningsPage = () => {
         ref={tableRef}
         loading={isLoading}
         columns={earningsColumns}
-        data={tableData}
+        data={filteredData}
         pageSize={7}
       />
     </div>
