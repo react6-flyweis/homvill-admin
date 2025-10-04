@@ -28,13 +28,21 @@ const EditUser = () => {
       lastName: u.last_name || u.lastName || "",
       phone: u.phone || "",
       email: u.email || "",
+      gender: u.gender || "",
       userType:
         u.Role_id?.role_name || u.Responsibility_id?.Responsibility_name || "",
-      userCategory: u.User_Category_id?.User_Category_name || "",
+      userCategory:
+        u.User_Category_id?.User_Category_name ||
+        u.User_Category_id?.name ||
+        "",
       street: u.location?.street || u.street || "",
-      city: u.City_id?.City_name || u.city || "",
-      state: u.State_id?.state_name || u.state || "",
-      country: u.Country_id?.Country_name || u.country || "",
+      city: u.City_id?.City_name || u.City_id?.City_name || u.city || "",
+      state: u.State_id?.state_name || u.State_id?.state_name || u.state || "",
+      country:
+        u.Country_id?.Country_name ||
+        u.Country_id?.Country_name ||
+        u.country ||
+        "",
       zip: u.zipcode || "",
       // Date:  then onboarding date
       date: u.dateOfJoining || "",
