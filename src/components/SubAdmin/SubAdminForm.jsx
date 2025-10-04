@@ -73,8 +73,8 @@ export const SubAdminForm = ({ initialEmployeeId = "", onCreate }) => {
 
       // build a minimal employee object to pass to permissions page
       const employee = {
-        id: trimmedId,
-        name: trimmedId, // no name provided from form; use id as fallback
+        id: res.data?.user_id,
+        name: res.data?.Name,
         image: "https://via.placeholder.com/40",
       };
 
