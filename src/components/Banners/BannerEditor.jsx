@@ -20,9 +20,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { useCreateBanner, useUpdateBanner } from "@/mutations/banner";
+import { toast } from "sonner";
+import DatePicker from "@/components/ui/DatePicker";
 
-export function BannerEditor({ open, onOpenChange, onSave, initialValues }) {
+export function BannerEditor({ open, onOpenChange, initialValues }) {
   const bannerSchema = z.object({
     headline: z.string().min(1, "Headline is required"),
     category: z.string().min(1, "Category is required"),
@@ -31,21 +34,53 @@ export function BannerEditor({ open, onOpenChange, onSave, initialValues }) {
     image: z.string().optional(),
   });
 
+  console.log(initialValues);
+
   const form = useForm({
     resolver: zodResolver(bannerSchema),
     defaultValues: {
-      headline: "",
-      category: "",
-      date: "",
-      description: "",
-      image: "",
+      headline: initialValues?.headline || "",
+      category: initialValues?.Catetory_id || "",
+      date: initialValues?.publishingDate || "",
+      description: initialValues?.Description || "",
+      image: initialValues?.image || "",
     },
   });
 
-  const onSubmit = (values) => {
-    // Provide the collected banner data
-    if (onSave) onSave(values);
-    onOpenChange(false);
+  const createMutation = useCreateBanner();
+  const updateMutation = useUpdateBanner();
+
+  const onSubmit = async (values) => {
+    // map form values to API payload keys expected by backend
+    const payload = {
+      headline: values.headline,
+      Catetory_id: Number(values.category) || values.category,
+      publishingDate: values.date,
+      Description: values.description,
+      banner_image: values.image,
+      FaceBook_link: values.FaceBook_link || "",
+      instagram_link: values.instagram_link || "",
+      website_link: values.website_link || "",
+      twitter_link: values.twitter_link || "",
+    };
+
+    try {
+      if (initialValues && initialValues.Banners_id) {
+        const id = initialValues.Banners_id;
+        await updateMutation.mutateAsync({ id, ...payload });
+        toast.success("Banner updated successfully");
+      } else {
+        await createMutation.mutateAsync(payload);
+        toast.success("Banner created successfully");
+      }
+
+      onOpenChange(false);
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message || err?.message || "Failed to save banner";
+      toast.error(msg);
+      // keep dialog open for user to correct
+    }
   };
 
   // close dialog when `open` becomes false
@@ -54,9 +89,9 @@ export function BannerEditor({ open, onOpenChange, onSave, initialValues }) {
       // when opening, populate with provided initial values (edit case)
       form.reset({
         headline: initialValues?.headline ?? "",
-        category: initialValues?.category ?? "",
-        date: initialValues?.date ?? "",
-        description: initialValues?.description ?? "",
+        category: initialValues?.Catetory_id.toString() ?? "",
+        date: initialValues?.publishingDate ?? "",
+        description: initialValues?.Description ?? "",
         image: initialValues?.image ?? "",
       });
     } else {
@@ -129,7 +164,10 @@ export function BannerEditor({ open, onOpenChange, onSave, initialValues }) {
                           Publishing date
                         </FormLabel>
                         <FormControl>
-                          <Input placeholder="publishing date" {...field} />
+                          <DatePicker
+                            placeholder="publishing date"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -158,9 +196,13 @@ export function BannerEditor({ open, onOpenChange, onSave, initialValues }) {
             />
 
             <DialogFooter>
-              <Button type="submit" className="w-40 mx-auto">
-                Add
-              </Button>
+              <LoadingButton
+                type="submit"
+                className="w-40 mx-auto"
+                isLoading={form.formState.isSubmitting}
+              >
+                {initialValues ? "Update" : "Add"} Banner
+              </LoadingButton>
             </DialogFooter>
           </form>
         </Form>
