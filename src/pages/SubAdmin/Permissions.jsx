@@ -24,8 +24,6 @@ export default function Permissions() {
   const location = useLocation();
   const navigate = useNavigate();
   const employee = location.state?.employee || null;
-  const isEdit = !!location.state?.isEdit;
-  const passedPermissions = location.state?.permissions || null;
 
   const form = useForm({
     defaultValues: {
@@ -102,13 +100,10 @@ export default function Permissions() {
   useEffect(() => {
     if (employee) {
       form.reset({
-        // prefer passed permissions when available
-        ...(passedPermissions || {
-          users: { edit: false, view: false },
-          properties: { edit: false, view: false },
-          contracts: { edit: false, view: false },
-          subscription: { edit: false, view: false },
-        }),
+        users: { edit: false, view: false },
+        properties: { edit: false, view: false },
+        contracts: { edit: false, view: false },
+        subscription: { edit: false, view: false },
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -178,7 +173,7 @@ export default function Permissions() {
 
   return (
     <PageLayout
-      title={isEdit ? "Edit Permissions" : "Permissions"}
+      title={employee ? "Edit Permissions" : "Permissions"}
       description="Monitor any changes made to your project, schema and content with audit logs."
     >
       <div
@@ -262,7 +257,7 @@ export default function Permissions() {
                   createPermission.isLoading || form.formState.isSubmitting
                 }
               >
-                {isEdit ? "Save Changes" : "Create Sub Admin"}
+                {employee ? "Save Changes" : "Create Sub Admin"}
               </LoadingButton>
             </div>
           </form>
